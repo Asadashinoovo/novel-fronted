@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getChapterContent, getBookChapters } from '@/api/modules/book'
+import { getChapterContent, getBookChapters, getBookDetail } from '@/api/modules/book'
 import { ElMessage } from 'element-plus'
+import { ElDrawer } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const chapter = ref<any>(null)
+const bookName = ref('')
+const bookCover = ref('')
 const chapterNum = ref<number>(0)
 const chapters = ref<any[]>([])
 const chapterIndex = ref(0)
@@ -24,18 +27,23 @@ const touchStartX = ref(0)
 const touchEndX = ref(0)
 
 // 底部导航栏显示状态
-const showNavBar = ref(true)
+const showNavBar = ref(false)
+
+// 目录抽屉显示状态
+const showChapterDrawer = ref(false)
 
 // 分页控制函数
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
+    window.scrollTo(0, 0)
   }
 }
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++
+    window.scrollTo(0, 0)
   } else if (chapterIndex.value < chapters.value.length - 1) {
     // 当前章最后一页，跳转到下一章第一页
     const nextBookId = Number(route.params.bookId)
@@ -47,6 +55,7 @@ const nextPage = () => {
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
+    window.scrollTo(0, 0)
   } else if (chapterIndex.value > 0) {
     // 当前章第一页，跳转到上一章最后一页，传递 targetPage=-1 表示最后一页
     const prevBookId = Number(route.params.bookId)
@@ -57,14 +66,23 @@ const prevPage = () => {
 
 function goToPrevChapter() {
   if (prevChapterId.value) {
+    window.scrollTo(0, 0)
     router.push(`/read/${route.params.bookId}/${prevChapterId.value}?chapterIndex=${chapterIndex.value - 1}`)
   }
 }
 
 function goToNextChapter() {
   if (nextChapterId.value) {
+    window.scrollTo(0, 0)
     router.push(`/read/${route.params.bookId}/${nextChapterId.value}?chapterIndex=${chapterIndex.value + 1}`)
   }
+}
+
+function goToChapter(chapterId: number, index: number) {
+  window.scrollTo(0, 0)
+  showChapterDrawer.value = false
+  showNavBar.value = false
+  router.push(`/read/${route.params.bookId}/${chapterId}?chapterIndex=${index}`)
 }
 
 // 触摸手势处理
@@ -86,6 +104,9 @@ const handleTouchEnd = (e: TouchEvent) => {
 
 // 点击屏幕边缘处理
 const handleContentClick = (e: MouseEvent) => {
+  // 如果抽屉是打开的，不处理点击事件
+  if (showChapterDrawer.value) return
+
   const target = e.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
   const clickX = e.clientX - rect.left
@@ -137,6 +158,7 @@ async function fetchChapter() {
   nextChapterId.value = null
   pages.value = []
   currentPage.value = 1
+  showChapterDrawer.value = false
 
   const bookId = Number(route.params.bookId)
   const chapterId = Number(route.params.id)
@@ -163,6 +185,17 @@ async function fetchChapter() {
     ElMessage.error('获取章节内容失败')
   } finally {
     loading.value = false
+  }
+
+  // 获取书籍信息
+  try {
+    const bookRes = await getBookDetail(bookId)
+    if (bookRes.data.success) {
+      bookName.value = bookRes.data.data.title
+      bookCover.value = bookRes.data.data.cover
+    }
+  } catch (e) {
+    console.error('获取书籍信息失败:', e)
   }
 
   // 获取章节列表计算上一章/下一章
@@ -216,8 +249,10 @@ onMounted(() => {
       </div>
       <!-- 底部翻页导航 -->
       <div class="page-navigation" :class="{ hidden: !showNavBar }">
-        <div class="page-counter">{{ currentPage }}/{{ totalPages }}</div>
         <div class="nav-btn-group left">
+          <button class="nav-btn menu-btn" @click.stop="showChapterDrawer = true">
+            目录
+          </button>
           <button
             v-if="chapterIndex > 0"
             class="nav-btn"
@@ -276,6 +311,20 @@ onMounted(() => {
           </button>
         </div>
       </div>
+
+      <!-- 目录抽屉 -->
+      <el-drawer v-model="showChapterDrawer" title="目录" direction="rtl" size="60%" :style="{ '--el-drawer-bg-color': '#e8f5e9' }">
+        <div class="drawer-header">
+          <img v-if="bookCover" :src="bookCover" class="drawer-cover" />
+          <span class="drawer-book-name">{{ bookName }}</span>
+        </div>
+        <div class="drawer-chapter-list">
+          <div class="chapter-item" v-for="(chapter, index) in chapters" :key="chapter.id" :class="{ active: index === chapterIndex }" @click="goToChapter(chapter.id, index)">
+            <span v-if="index === chapterIndex" class="active-icon">●</span>
+            <span class="chapter-num">第{{ index + 1 }}章</span><span class="chapter-gap"></span><span class="chapter-title">{{ chapter.title }}</span>
+          </div>
+        </div>
+      </el-drawer>
     </div>
   </div>
 </template>
@@ -286,7 +335,7 @@ onMounted(() => {
   background: #d4c4a8;
   color: #333;
   padding: 20px;
-  padding-bottom: 80px;
+  padding-bottom: 55px;
 }
 
 .header {
@@ -430,5 +479,87 @@ onMounted(() => {
 .ellipsis {
   color: #8b7355;
   font-size: 12px;
+}
+
+/* 目录抽屉 */
+.drawer-chapter-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-chapter-list .chapter-item {
+  padding: 14px 0;
+  border-bottom: 1px solid #ccc;
+  cursor: default;
+}
+
+.drawer-chapter-list .chapter-item:hover {
+  background: #e8f5e9;
+}
+
+.drawer-chapter-list .chapter-item.active {
+  color: #ff8c00;
+  background: #fff8f0;
+  border-radius: 4px;
+  padding: 12px 8px;
+}
+
+.drawer-chapter-list .chapter-item.active .chapter-num,
+.drawer-chapter-list .chapter-item.active .chapter-title {
+  color: #ff8c00;
+}
+
+.drawer-chapter-list .chapter-item.active .chapter-num,
+.drawer-chapter-list .chapter-item.active .chapter-title {
+  font-weight: normal;
+}
+
+.drawer-chapter-list .chapter-num {
+  font-size: 14px;
+  color: #333;
+}
+
+.drawer-chapter-list .chapter-title {
+  font-size: 14px;
+  color: #333;
+  font-weight: normal;
+}
+
+.active-icon {
+  color: #ff8c00;
+  margin-right: 6px;
+  font-size: 10px;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.drawer-cover {
+  width: 50px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.drawer-book-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.chapter-gap {
+  display: inline-block;
+  width: 20px;
+}
+
+.menu-btn {
+  background: #5c4a32;
 }
 </style>
