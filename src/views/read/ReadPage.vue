@@ -28,6 +28,7 @@ const touchEndX = ref(0)
 
 // 底部导航栏显示状态
 const showNavBar = ref(false)
+const isDarkMode = ref(false)
 
 // 目录抽屉显示状态
 const showChapterDrawer = ref(false)
@@ -83,6 +84,27 @@ function goToChapter(chapterId: number, index: number) {
   showChapterDrawer.value = false
   showNavBar.value = false
   router.push(`/read/${route.params.bookId}/${chapterId}?chapterIndex=${index}`)
+}
+
+function toggleDarkMode() {
+  isDarkMode.value = !isDarkMode.value
+  if (isDarkMode.value) {
+    document.documentElement.style.setProperty('--read-bg', '#1a1a1a')
+    document.documentElement.style.setProperty('--read-text', '#e0e0e0')
+    document.documentElement.style.setProperty('--read-nav-bg', 'rgba(30, 30, 30, 0.95)')
+    document.documentElement.style.setProperty('--read-icon-color', '#ccc')
+    document.documentElement.style.setProperty('--read-icon-border', '#ccc')
+  } else {
+    document.documentElement.style.setProperty('--read-bg', '#d4c4a8')
+    document.documentElement.style.setProperty('--read-text', '#333')
+    document.documentElement.style.setProperty('--read-nav-bg', 'rgba(212, 196, 168, 0.95)')
+    document.documentElement.style.setProperty('--read-icon-color', '#333')
+    document.documentElement.style.setProperty('--read-icon-border', '#333')
+  }
+}
+
+function handleComment() {
+  ElMessage.info('该功能还未实现哦~')
 }
 
 // 触摸手势处理
@@ -226,6 +248,11 @@ onMounted(() => {
 
 <template>
   <div class="read-page" @click="handleContentClick">
+    <div class="top-nav" :class="{ hidden: !showNavBar }">
+      <span class="top-nav-back" @click.stop="router.push(`/book/${route.params.bookId}`)">返回</span>
+      <span class="top-nav-left" @click.stop="ElMessage.info('该功能还未实现哦~')">加入书架</span>
+      <span class="top-nav-right" @click.stop="ElMessage.info('该功能还未实现哦~')">下载</span>
+    </div>
     <div class="header">
       <span class="back-btn" @click="router.push(`/book/${route.params.bookId}`)"><span class="arrow">&lt;</span> 第{{ chapterIndex + 1 }}章 {{ chapter?.title }}</span>
     </div>
@@ -293,6 +320,14 @@ onMounted(() => {
             </span>
             <span class="menu-label">目录</span>
           </div>
+          <div class="action-btn dark-mode-btn" @click.stop="toggleDarkMode">
+            <span class="moon-icon"><span class="moon-inner"></span></span>
+            <span class="action-label">{{ isDarkMode ? '日间' : '夜间' }}</span>
+          </div>
+          <div class="action-btn comment-btn" @click.stop="handleComment">
+            <span class="comment-icon"><span class="dot"></span><span class="dot"></span></span>
+            <span class="action-label">评论</span>
+          </div>
         </div>
       </div>
 
@@ -316,14 +351,55 @@ onMounted(() => {
 <style scoped>
 .read-page {
   min-height: 100vh;
-  background: #d4c4a8;
-  color: #333;
+  background: var(--read-bg, #d4c4a8);
+  color: var(--read-text, #333);
   padding: 20px;
   padding-bottom: 55px;
+  transition: background 0.3s, color 0.3s;
 }
 
 .header {
   margin-bottom: 20px;
+}
+
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: var(--read-nav-bg, rgba(212, 196, 168, 0.95));
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s;
+}
+
+.top-nav.hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.top-nav-left {
+  font-size: 15px;
+  color: var(--read-icon-color, #333);
+  position: absolute;
+  left: 33%;
+}
+
+.top-nav-back {
+  font-size: 15px;
+  color: var(--read-icon-color, #333);
+}
+
+.top-nav-right {
+  font-size: 15px;
+  color: var(--read-icon-color, #333);
+  position: absolute;
+  right: 33%;
 }
 
 .back-btn {
@@ -366,7 +442,7 @@ onMounted(() => {
 }
 
 .chapter-content {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.8;
   color: #4a3f2f;
   text-indent: 2em;
@@ -388,9 +464,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   padding: 10px 16px;
-  background: rgba(212, 196, 168, 0.95);
+  background: var(--read-nav-bg, rgba(212, 196, 168, 0.95));
   backdrop-filter: blur(10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s;
 }
 
 .nav-row {
@@ -592,22 +668,24 @@ onMounted(() => {
   letter-spacing: 3px;
   text-align: center;
   line-height: 0.35;
-  color: #333;
+  color: var(--read-icon-color, #333);
   font-weight: 700;
   cursor: pointer;
 }
 
 .dot {
   font-size: 6px;
+  color: var(--read-icon-color, #333);
 }
 
 .dash {
   font-size: 12px;
+  color: var(--read-icon-color, #333);
 }
 
 .menu-label {
   font-size: 10px;
-  color: #333;
+  color: var(--read-icon-color, #333);
   cursor: pointer;
 }
 
@@ -618,5 +696,67 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   cursor: pointer;
+}
+
+.action-btn {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.action-btn.dark-mode-btn {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.action-btn.comment-btn {
+  right: 15%;
+}
+
+.comment-icon {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--read-icon-border, #333);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.comment-icon .dot {
+  width: 2px;
+  height: 2px;
+  background: var(--read-icon-color, #333);
+  border-radius: 50%;
+}
+
+.moon-icon {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--read-icon-border, #333);
+  border-radius: 50%;
+  margin-bottom: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.moon-icon .moon-inner {
+  position: absolute;
+  top: 1px;
+  right: -3px;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--read-icon-border, #333);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.action-label {
+  font-size: 10px;
+  color: var(--read-icon-color, #333);
 }
 </style>
