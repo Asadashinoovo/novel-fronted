@@ -23,6 +23,9 @@ const pages = ref<string[]>([])
 const touchStartX = ref(0)
 const touchEndX = ref(0)
 
+// 底部导航栏显示状态
+const showNavBar = ref(true)
+
 // 分页控制函数
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
@@ -91,6 +94,9 @@ const handleContentClick = (e: MouseEvent) => {
     prevPage()
   } else if (percentage > 0.7) {
     nextPage()
+  } else {
+    // 中间区域点击，切换底部导航栏显示/隐藏
+    showNavBar.value = !showNavBar.value
   }
 }
 
@@ -186,7 +192,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="read-page">
+  <div class="read-page" @click="handleContentClick">
     <div class="header">
       <span class="back-btn" @click="router.push(`/book/${route.params.bookId}`)"><span class="arrow">&lt;</span> 第{{ chapterIndex + 1 }}章 {{ chapter?.title }}</span>
     </div>
@@ -198,32 +204,31 @@ onMounted(() => {
         <span>阅读：{{ chapter.readCount }}</span>
         <span>第{{ chapterIndex + 1 }}/{{ chapters.length }}章</span>
       </div>
-      <!-- 内容包装容器，绑定触摸和点击事件 -->
+      <!-- 内容包装容器，绑定触摸事件 -->
       <div
         class="chapter-content-wrapper"
         @touchstart="handleTouchStart"
         @touchend="handleTouchEnd"
-        @click="handleContentClick"
       >
         <div class="chapter-content">
           {{ pages[currentPage - 1] }}
         </div>
       </div>
       <!-- 底部翻页导航 -->
-      <div class="page-navigation">
+      <div class="page-navigation" :class="{ hidden: !showNavBar }">
         <div class="page-counter">{{ currentPage }}/{{ totalPages }}</div>
         <div class="nav-btn-group left">
           <button
             v-if="chapterIndex > 0"
             class="nav-btn"
-            @click="goToPrevChapter()"
+            @click.stop="goToPrevChapter()"
           >
             上一章
           </button>
           <button
             class="nav-btn"
             :disabled="currentPage <= 1 && chapterIndex <= 0"
-            @click="prevPage()"
+            @click.stop="prevPage()"
           >
             上一页
           </button>
@@ -235,7 +240,7 @@ onMounted(() => {
               :key="i"
               class="indicator"
               :class="{ active: i === currentPage }"
-              @click="goToPage(i)"
+              @click.stop="goToPage(i)"
             ></span>
           </template>
           <template v-else>
@@ -244,13 +249,13 @@ onMounted(() => {
               :key="i"
               class="indicator"
               :class="{ active: i === currentPage }"
-              @click="goToPage(i)"
+              @click.stop="goToPage(i)"
             ></span>
             <span class="ellipsis">...</span>
             <span
               class="indicator"
               :class="{ active: totalPages === currentPage }"
-              @click="goToPage(totalPages)"
+              @click.stop="goToPage(totalPages)"
             ></span>
           </template>
         </div>
@@ -258,14 +263,14 @@ onMounted(() => {
           <button
             v-if="currentPage < totalPages || chapterIndex < chapters.length - 1"
             class="nav-btn"
-            @click="nextPage()"
+            @click.stop="nextPage()"
           >
             下一页
           </button>
           <button
             v-if="chapterIndex < chapters.length - 1"
             class="nav-btn"
-            @click="goToNextChapter()"
+            @click.stop="goToNextChapter()"
           >
             下一章
           </button>
@@ -353,6 +358,13 @@ onMounted(() => {
   padding: 12px 16px;
   background: rgba(212, 196, 168, 0.95);
   backdrop-filter: blur(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.page-navigation.hidden {
+  opacity: 0;
+  transform: translateY(100%);
+  pointer-events: none;
 }
 
 .page-counter {
