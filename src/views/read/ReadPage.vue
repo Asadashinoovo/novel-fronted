@@ -337,7 +337,7 @@ onMounted(() => {
 
 /* 内容包装容器 */
 .chapter-content-wrapper {
-  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 

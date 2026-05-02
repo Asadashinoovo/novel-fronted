@@ -214,6 +214,8 @@ function goToRead(chapterId: number, chapterIndex: number) {
   padding-bottom: 40px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 /* 顶部返回按钮 */
@@ -232,7 +234,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
 .back-btn {
   font-size: 16px;
   color: #333;
-  cursor: pointer;
+  cursor: default;
 }
 
 /* 顶部信息栏 */
@@ -465,7 +467,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
   display: flex;
   padding: 10px 0;
   border-bottom: 1px solid #eee;
-  cursor: pointer;
+  cursor: default;
 }
 
 .chapter-item:hover {
@@ -494,7 +496,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
   align-items: center;
   justify-content: center;
   padding: 10px 0;
-  cursor: pointer;
+  cursor: default;
   color: #999;
   font-size: 12px;
 }
@@ -515,7 +517,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
 .drawer-chapter-list .chapter-item {
   padding: 14px 0;
   border-bottom: 1px solid #ccc;
-  cursor: pointer;
+  cursor: default;
 }
 
 .drawer-chapter-list .chapter-item:hover {
