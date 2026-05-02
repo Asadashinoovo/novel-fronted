@@ -466,6 +466,12 @@ onMounted(() => {
   background: #6b5a45;
 }
 
+.nav-btn:disabled {
+  background: #c4b89a;
+  color: #999;
+  cursor: not-allowed;
+}
+
 .page-indicators {
   display: flex;
   gap: 8px;
