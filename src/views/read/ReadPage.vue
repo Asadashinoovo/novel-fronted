@@ -90,9 +90,9 @@ const handleContentClick = (e: MouseEvent) => {
   const rect = target.getBoundingClientRect()
   const clickX = e.clientX - rect.left
   const percentage = clickX / rect.width
-  if (percentage < 0.3) {
+  if (percentage < 0.2) {
     prevPage()
-  } else if (percentage > 0.7) {
+  } else if (percentage > 0.8) {
     nextPage()
   } else {
     // 中间区域点击，切换底部导航栏显示/隐藏
