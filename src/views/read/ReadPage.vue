@@ -249,66 +249,50 @@ onMounted(() => {
       </div>
       <!-- 底部翻页导航 -->
       <div class="page-navigation" :class="{ hidden: !showNavBar }">
-        <div class="nav-btn-group left">
-          <button class="nav-btn menu-btn" @click.stop="showChapterDrawer = true">
-            目录
-          </button>
-          <button
-            v-if="chapterIndex > 0"
-            class="nav-btn"
-            @click.stop="goToPrevChapter()"
-          >
-            上一章
-          </button>
-          <button
-            class="nav-btn"
-            :disabled="currentPage <= 1 && chapterIndex <= 0"
-            @click.stop="prevPage()"
-          >
-            上一页
-          </button>
+        <div class="nav-row top-row">
+          <div class="nav-btn-group left">
+            <button
+              class="nav-btn nav-btn-small"
+              :disabled="chapterIndex <= 0"
+              @click.stop="goToPrevChapter()"
+            >
+              上一章
+            </button>
+            <button
+              class="nav-btn nav-btn-small"
+              :disabled="currentPage <= 1 && chapterIndex <= 0"
+              @click.stop="prevPage()"
+            >
+              上一页
+            </button>
+          </div>
+          <div class="page-counter">{{ currentPage }}/{{ totalPages }}</div>
+          <div class="nav-btn-group right">
+            <button
+              class="nav-btn nav-btn-small"
+              :disabled="currentPage >= totalPages && chapterIndex >= chapters.length - 1"
+              @click.stop="nextPage()"
+            >
+              下一页
+            </button>
+            <button
+              class="nav-btn nav-btn-small"
+              :disabled="chapterIndex >= chapters.length - 1"
+              @click.stop="goToNextChapter()"
+            >
+              下一章
+            </button>
+          </div>
         </div>
-        <div class="page-indicators">
-          <template v-if="totalPages <= 7">
-            <span
-              v-for="i in totalPages"
-              :key="i"
-              class="indicator"
-              :class="{ active: i === currentPage }"
-              @click.stop="goToPage(i)"
-            ></span>
-          </template>
-          <template v-else>
-            <span
-              v-for="i in 3"
-              :key="i"
-              class="indicator"
-              :class="{ active: i === currentPage }"
-              @click.stop="goToPage(i)"
-            ></span>
-            <span class="ellipsis">...</span>
-            <span
-              class="indicator"
-              :class="{ active: totalPages === currentPage }"
-              @click.stop="goToPage(totalPages)"
-            ></span>
-          </template>
-        </div>
-        <div class="nav-btn-group right">
-          <button
-            v-if="currentPage < totalPages || chapterIndex < chapters.length - 1"
-            class="nav-btn"
-            @click.stop="nextPage()"
-          >
-            下一页
-          </button>
-          <button
-            v-if="chapterIndex < chapters.length - 1"
-            class="nav-btn"
-            @click.stop="goToNextChapter()"
-          >
-            下一章
-          </button>
+        <div class="nav-row bottom-row">
+          <div class="menu-wrapper" @click.stop="showChapterDrawer = true">
+            <span class="menu-icon">
+              <span class="dot">·</span><span class="dash">—</span><br>
+              <span class="dot">·</span><span class="dash">—</span><br>
+              <span class="dot">·</span><span class="dash">—</span>
+            </span>
+            <span class="menu-label">目录</span>
+          </div>
         </div>
       </div>
 
@@ -402,12 +386,28 @@ onMounted(() => {
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
+  flex-direction: column;
+  padding: 10px 16px;
   background: rgba(212, 196, 168, 0.95);
   backdrop-filter: blur(10px);
   transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-row.top-row {
+  margin-bottom: 8px;
+}
+
+.nav-row.bottom-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 44px;
 }
 
 .page-navigation.hidden {
@@ -424,7 +424,7 @@ onMounted(() => {
 
 .nav-btn-group {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .nav-btn-group.left {
@@ -444,11 +444,22 @@ onMounted(() => {
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: center;
+  outline: none;
 }
 
-.nav-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+.nav-btn:focus {
+  outline: none;
+  box-shadow: none;
+  background: #8b7355;
+}
+
+.nav-btn-small {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-width: 50px;
 }
 
 .nav-btn:not(:disabled):hover {
@@ -561,5 +572,45 @@ onMounted(() => {
 
 .menu-btn {
   background: #5c4a32;
+  min-width: 50px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: none;
+  outline: none;
+}
+
+.menu-icon {
+  letter-spacing: 3px;
+  text-align: center;
+  line-height: 0.35;
+  color: #333;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dot {
+  font-size: 6px;
+}
+
+.dash {
+  font-size: 12px;
+}
+
+.menu-label {
+  font-size: 10px;
+  color: #333;
+  cursor: pointer;
+}
+
+.menu-wrapper {
+  position: absolute;
+  left: 15%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
 }
 </style>
