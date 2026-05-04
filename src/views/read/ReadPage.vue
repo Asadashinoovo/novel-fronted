@@ -29,6 +29,11 @@ const pages = ref<string[]>([])
 const touchStartX = ref(0)
 const touchEndX = ref(0)
 
+// 鼠标拖拽检测
+const mouseStartX = ref(0)
+const mouseStartY = ref(0)
+const isDragging = ref(false)
+
 // 底部导航栏显示状态
 const showNavBar = ref(false)
 const isDarkMode = ref(false)
@@ -137,12 +142,28 @@ async function openSummary() {
   }
 }
 
+// 鼠标拖拽检测
+const handleMouseDown = (e: MouseEvent) => {
+  mouseStartX.value = e.clientX
+  mouseStartY.value = e.clientY
+  isDragging.value = false
+}
+
+const handleMouseMove = (e: MouseEvent) => {
+  const dx = Math.abs(e.clientX - mouseStartX.value)
+  const dy = Math.abs(e.clientY - mouseStartY.value)
+  if (dx > 10 || dy > 10) {
+    isDragging.value = true
+  }
+}
+
 // 触摸手势处理
 const handleTouchStart = (e: TouchEvent) => {
   touchStartX.value = e.touches[0].clientX
 }
 
 const handleTouchEnd = (e: TouchEvent) => {
+  if (showSummaryDialog.value || showChatDrawer.value || showCharacterDrawer.value) return
   touchEndX.value = e.changedTouches[0].clientX
   const diffX = touchEndX.value - touchStartX.value
   if (Math.abs(diffX) > 50) {
@@ -156,8 +177,10 @@ const handleTouchEnd = (e: TouchEvent) => {
 
 // 点击屏幕边缘处理
 const handleContentClick = (e: MouseEvent) => {
-  // 如果抽屉是打开的，不处理点击事件
-  if (showChapterDrawer.value) return
+  // 如果是拖拽操作，不处理点击事件
+  if (isDragging.value) return
+  // 如果抽屉或对话框是打开的，不处理点击事件
+  if (showChapterDrawer.value || showSummaryDialog.value || showChatDrawer.value || showCharacterDrawer.value) return
 
   const target = e.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
@@ -278,7 +301,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="read-page" @click="handleContentClick">
+  <div class="read-page" @click="handleContentClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove">
     <div class="top-nav" :class="{ hidden: !showNavBar }">
       <span class="top-nav-back" @click.stop="router.push(`/book/${route.params.bookId}`)">返回</span>
       <span class="top-nav-left" @click.stop="ElMessage.info('该功能还未实现哦~')">加入书架</span>
