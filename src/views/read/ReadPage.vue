@@ -285,7 +285,7 @@ onMounted(() => {
       <span class="top-nav-right" @click.stop="ElMessage.info('该功能还未实现哦~')">下载</span>
     </div>
     <div class="header">
-      <span class="back-btn" @click="router.push(`/book/${route.params.bookId}`)"><span class="arrow">&lt;</span> 第{{ chapterIndex + 1 }}章 {{ chapter?.title }}</span>
+      <span class="back-btn" @click.stop="router.push(`/book/${route.params.bookId}`)"><span class="arrow">&lt;</span> 第{{ chapterIndex + 1 }}章 {{ chapter?.title }}</span>
     </div>
     <div v-if="loading" class="loading">加载中...</div>
     <div v-else-if="chapter" class="content">
