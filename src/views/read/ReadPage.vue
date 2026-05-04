@@ -2,8 +2,11 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getChapterContent, getBookChapters, getBookDetail } from '@/api/modules/book'
+import { getSummaryUpToChapter } from '@/api/modules/ai'
 import { ElMessage } from 'element-plus'
-import { ElDrawer } from 'element-plus'
+import { ElDrawer, ElDialog } from 'element-plus'
+import AiChat from '@/components/AiChat.vue'
+import CharacterSearch from '@/components/CharacterSearch.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -32,6 +35,14 @@ const isDarkMode = ref(false)
 
 // 目录抽屉显示状态
 const showChapterDrawer = ref(false)
+
+// AI 功能状态
+const showSummaryDialog = ref(false)
+const summaryText = ref('')
+const summaryChapterId = ref<number | null>(null)
+const summaryLoading = ref(false)
+const showChatDrawer = ref(false)
+const showCharacterDrawer = ref(false)
 
 // 分页控制函数
 const goToPage = (page: number) => {
@@ -105,6 +116,25 @@ function toggleDarkMode() {
 
 function handleComment() {
   ElMessage.info('该功能还未实现哦~')
+}
+
+async function openSummary() {
+  const bookId = Number(route.params.bookId)
+  const chapterId = Number(route.params.id)
+  summaryLoading.value = true
+  showSummaryDialog.value = true
+  summaryText.value = ''
+  try {
+    const res = await getSummaryUpToChapter(bookId, chapterId)
+    if (res.data.success && res.data.data) {
+      summaryText.value = res.data.data.summary
+      summaryChapterId.value = res.data.data.chapterId
+    }
+  } catch (e) {
+    // handled by interceptor
+  } finally {
+    summaryLoading.value = false
+  }
 }
 
 // 触摸手势处理
@@ -275,6 +305,17 @@ onMounted(() => {
           {{ pages[currentPage - 1] }}
         </div>
       </div>
+
+      <!-- AI 功能区（仅在最后一页显示） -->
+      <div v-if="currentPage === totalPages" class="ai-section">
+        <div class="ai-section-divider">— AI 辅助 —</div>
+        <div class="ai-buttons">
+          <button class="ai-btn" @click.stop="openSummary">前情提要</button>
+          <button class="ai-btn" @click.stop="showChatDrawer = true">AI 助手</button>
+          <button class="ai-btn" @click.stop="showCharacterDrawer = true">角色查询</button>
+        </div>
+      </div>
+
       <!-- 底部翻页导航 -->
       <div class="page-navigation" :class="{ hidden: !showNavBar }">
         <div class="nav-row top-row">
@@ -344,6 +385,22 @@ onMounted(() => {
             <span class="chapter-num">第{{ index + 1 }}章</span><span class="chapter-gap"></span><span class="chapter-title">{{ chapter.title }}</span>
           </div>
         </div>
+      </el-drawer>
+
+      <!-- 前情提要对话框 -->
+      <el-dialog v-model="showSummaryDialog" title="前情提要" width="90%" :style="{ maxWidth: '480px', '--el-dialog-bg-color': '#fdf8f0' }">
+        <div v-if="summaryLoading" class="summary-loading">AI 正在整理剧情...</div>
+        <div v-else class="summary-content">{{ summaryText }}</div>
+      </el-dialog>
+
+      <!-- AI 助手抽屉 -->
+      <el-drawer v-model="showChatDrawer" title="AI 阅读助手" direction="rtl" size="85%" :style="{ '--el-drawer-bg-color': '#fdf8f0' }">
+        <AiChat :book-id="Number(route.params.bookId)" :max-chapter-id="Number(route.params.id)" />
+      </el-drawer>
+
+      <!-- 角色搜索抽屉 -->
+      <el-drawer v-model="showCharacterDrawer" title="角色查询" direction="rtl" size="85%" :style="{ '--el-drawer-bg-color': '#fdf8f0' }">
+        <CharacterSearch :book-id="Number(route.params.bookId)" :max-chapter-id="Number(route.params.id)" />
       </el-drawer>
     </div>
   </div>
@@ -759,5 +816,62 @@ onMounted(() => {
 .action-label {
   font-size: 10px;
   color: var(--read-icon-color, #333);
+}
+
+/* AI 功能区 */
+.ai-section {
+  max-width: 800px;
+  margin: 32px auto 16px;
+  text-align: center;
+}
+
+.ai-section-divider {
+  font-size: 13px;
+  color: #b0a090;
+  margin-bottom: 16px;
+}
+
+.ai-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ai-btn {
+  padding: 10px 22px;
+  border: 1px solid #c4b89a;
+  border-radius: 20px;
+  background: #faf6f0;
+  color: #5c4a32;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-btn:hover {
+  background: #8b7355;
+  color: #fff;
+  border-color: #8b7355;
+}
+
+.ai-btn:active {
+  transform: scale(0.97);
+}
+
+/* 前情提要对话框 */
+.summary-loading {
+  text-align: center;
+  color: #8b7355;
+  padding: 32px 0;
+  font-size: 14px;
+}
+
+.summary-content {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #4a3f2f;
+  white-space: pre-wrap;
+  text-indent: 2em;
 }
 </style>
