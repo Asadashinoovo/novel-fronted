@@ -371,7 +371,7 @@ onMounted(() => {
   <!-- 悬浮球 -->
   <div class="float-ball-container" :class="{ hidden: !showNavBar }" @click.stop>
     <div class="float-ball" @click.stop="showFloatBall = !showFloatBall" :class="{ active: showFloatBall }">
-      <span class="float-ball-icon">≡</span>
+      <span class="float-ball-icon">AI</span>
     </div>
     <transition name="fade-slide">
       <div v-if="showFloatBall" class="float-ball-menu">
@@ -846,27 +846,33 @@ onMounted(() => {
 }
 
 .float-ball {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #8b7355;
+  background: #4a90d9;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(74, 144, 217, 0.4);
+  transition: all 0.3s ease;
+}
+
+.float-ball:hover {
+  transform: scale(1.1);
+  background: #3a7fc4;
 }
 
 .float-ball.active {
-  background: #5c4a32;
+  background: #2d6aa6;
 }
 
 .float-ball-icon {
   color: #fff;
-  font-size: 20px;
+  font-size: 14px;
   font-weight: bold;
   line-height: 1;
+  letter-spacing: 1px;
 }
 
 .float-ball-menu {
