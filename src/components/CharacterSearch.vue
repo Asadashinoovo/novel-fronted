@@ -41,8 +41,10 @@ async function doSearch() {
         ElMessage.info('未找到相关角色')
       }
     }
-  } catch (e) {
-    // handled by interceptor
+  } catch (e: any) {
+    if (e?.response?.status === 401) {
+      ElMessage.error('这是会员功能，请联系管理员添加会员账号')
+    }
   } finally {
     searching.value = false
     searched.value = true
