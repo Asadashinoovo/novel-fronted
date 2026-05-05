@@ -7,7 +7,8 @@
       "Bash(mkdir -p \"D:/Projects/web-project/test/my-app/docs/superpowers/specs\")",
       "Bash(git -C \"D:/Projects/web-project/test/my-app\" log --oneline -5)",
       "Bash(git checkout:*)",
-      "Bash(find src:*)"
+      "Bash(find src:*)",
+      "Bash(dir \"E:\\\\novel\\\\novel-fronted\")"
     ]
   }
 }
