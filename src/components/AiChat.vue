@@ -6,12 +6,19 @@ import type { ChatMessage } from '@/types'
 const props = defineProps<{
   bookId: number
   maxChapterId?: number
+  chapters?: any[]
 }>()
 
 const messages = ref<ChatMessage[]>([])
 const inputText = ref('')
 const sending = ref(false)
 const chatContainer = ref<HTMLElement>()
+
+function getChapterNum(chapterId: number): number {
+  if (!props.chapters || props.chapters.length === 0) return chapterId
+  const chapter = props.chapters.find(c => c.id === chapterId)
+  return chapter ? chapter.chapterNum : chapterId
+}
 
 function scrollToBottom() {
   nextTick(() => {
@@ -81,7 +88,7 @@ function handleKeydown(e: KeyboardEvent) {
             v-for="src in msg.sources"
             :key="src.chapterId"
             class="source-tag"
-          >第{{ src.chapterId }}章</span>
+          >第{{ getChapterNum(src.chapterId) }}章</span>
         </div>
       </div>
 

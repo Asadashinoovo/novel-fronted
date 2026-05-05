@@ -418,12 +418,12 @@ onMounted(() => {
 
       <!-- AI 助手抽屉 -->
       <el-drawer v-model="showChatDrawer" title="AI 阅读助手" direction="rtl" size="85%" :style="{ '--el-drawer-bg-color': '#fdf8f0' }">
-        <AiChat :book-id="Number(route.params.bookId)" :max-chapter-id="Number(route.params.id)" />
+        <AiChat :book-id="Number(route.params.bookId)" :max-chapter-id="Number(route.params.id)" :chapters="chapters" />
       </el-drawer>
 
       <!-- 角色搜索抽屉 -->
       <el-drawer v-model="showCharacterDrawer" title="角色查询" direction="rtl" size="85%" :style="{ '--el-drawer-bg-color': '#fdf8f0' }">
-        <CharacterSearch :book-id="Number(route.params.bookId)" :max-chapter-id="Number(route.params.id)" />
+        <CharacterSearch :book-id="Number(route.params.bookId)" :max-chapter-id="Number(route.params.id)" :chapters="chapters" />
       </el-drawer>
     </div>
   </div>
