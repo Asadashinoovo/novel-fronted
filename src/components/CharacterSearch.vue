@@ -7,12 +7,19 @@ import type { CharacterSearchResult } from '@/types'
 const props = defineProps<{
   bookId: number
   maxChapterId?: number
+  chapters?: any[]
 }>()
 
 const keyword = ref('')
 const searching = ref(false)
 const results = ref<CharacterSearchResult[]>([])
 const searched = ref(false)
+
+function getChapterNum(chapterId: number): number {
+  if (!props.chapters || props.chapters.length === 0) return chapterId
+  const chapter = props.chapters.find(c => c.id === chapterId)
+  return chapter ? chapter.chapterNum : chapterId
+}
 
 async function doSearch() {
   const name = keyword.value.trim()
@@ -85,7 +92,7 @@ function handleKeydown(e: KeyboardEvent) {
         class="character-card"
       >
         <div class="character-name">{{ char.characterName }}</div>
-        <div class="character-first-chapter">首次登场：第{{ char.firstChapterId }}章</div>
+        <div class="character-first-chapter">首次登场：第{{ getChapterNum(char.firstChapterId) }}章</div>
         <div v-if="char.events && char.events.length > 0" class="event-list">
           <div class="event-title">事迹时间线（{{ char.events.length }}条）：</div>
           <div
@@ -93,7 +100,7 @@ function handleKeydown(e: KeyboardEvent) {
             :key="event.chapterId"
             class="event-item"
           >
-            <span class="event-chapter">第{{ event.chapterId }}章</span>
+            <span class="event-chapter">第{{ getChapterNum(event.chapterId) }}章</span>
             <span class="event-desc">{{ event.eventDescription }}</span>
           </div>
         </div>
