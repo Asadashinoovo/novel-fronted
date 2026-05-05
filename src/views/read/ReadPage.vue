@@ -25,10 +25,6 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const pages = ref<string[]>([])
 
-// 触摸跟踪变量
-const touchStartX = ref(0)
-const touchEndX = ref(0)
-
 // 鼠标拖拽检测
 const mouseStartX = ref(0)
 const mouseStartY = ref(0)
@@ -157,24 +153,6 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 }
 
-// 触摸手势处理
-const handleTouchStart = (e: TouchEvent) => {
-  touchStartX.value = e.touches[0].clientX
-}
-
-const handleTouchEnd = (e: TouchEvent) => {
-  if (showSummaryDialog.value || showChatDrawer.value || showCharacterDrawer.value) return
-  touchEndX.value = e.changedTouches[0].clientX
-  const diffX = touchEndX.value - touchStartX.value
-  if (Math.abs(diffX) > 50) {
-    if (diffX > 0) {
-      prevPage()
-    } else {
-      nextPage()
-    }
-  }
-}
-
 // 点击屏幕边缘处理
 const handleContentClick = (e: MouseEvent) => {
   // 如果是拖拽操作，不处理点击事件
@@ -186,9 +164,9 @@ const handleContentClick = (e: MouseEvent) => {
   const rect = target.getBoundingClientRect()
   const clickX = e.clientX - rect.left
   const percentage = clickX / rect.width
-  if (percentage < 0.2) {
+  if (percentage < 0.25) {
     prevPage()
-  } else if (percentage > 0.8) {
+  } else if (percentage > 0.75) {
     nextPage()
   } else {
     // 中间区域点击，切换底部导航栏显示/隐藏
@@ -318,12 +296,7 @@ onMounted(() => {
         <span>阅读：{{ chapter.readCount }}</span>
         <span>第{{ chapterIndex + 1 }}/{{ chapters.length }}章</span>
       </div>
-      <!-- 内容包装容器，绑定触摸事件 -->
-      <div
-        class="chapter-content-wrapper"
-        @touchstart="handleTouchStart"
-        @touchend="handleTouchEnd"
-      >
+      <div class="chapter-content-wrapper">
         <div class="chapter-content">
           {{ pages[currentPage - 1] }}
         </div>
