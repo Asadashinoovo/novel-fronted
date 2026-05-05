@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
 import { aiChat } from '@/api/modules/ai'
 import type { ChatMessage } from '@/types'
 
@@ -50,8 +51,10 @@ async function sendMessage() {
         sources: res.data.data.sources
       })
     }
-  } catch (e) {
-    // axios interceptor will show error message
+  } catch (e: any) {
+    if (e?.response?.status === 401) {
+      ElMessage.error('这是会员功能，请联系管理员添加会员账号')
+    }
   } finally {
     sending.value = false
     scrollToBottom()
