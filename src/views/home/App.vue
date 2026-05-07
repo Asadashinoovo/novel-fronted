@@ -152,6 +152,9 @@ onUnmounted(() => {
 
 <template>
   <div class="page">
+    <nav class="nav-bar">
+      <span class="nav-title">南瓜小说</span>
+    </nav>
     <div class="hero">
       <h1 class="hero-title">南瓜小说</h1>
       <p class="hero-sub">海量免费小说，畅享阅读时光</p>
@@ -234,6 +237,8 @@ onUnmounted(() => {
 <style scoped>
 .page {
   min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
   background: #faf7f2;
 }
 
@@ -373,7 +378,7 @@ onUnmounted(() => {
 
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   min-height: 200px;
 }
@@ -391,6 +396,24 @@ onUnmounted(() => {
   .hero-title {
     font-size: 26px;
   }
+}
+
+.nav-bar {
+  position: sticky;
+  top: 0;
+  background: #fff8f0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0ebe5;
+  z-index: 50;
+}
+
+.nav-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #5a3a2a;
+  margin-left: 8px;
 }
 
 .search-box {
