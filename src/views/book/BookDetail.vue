@@ -13,7 +13,7 @@ const book = ref<Book | null>(null)
 const chapters = ref<any[]>([])
 const comments = ref<any[]>([])
 const similarBooks = ref<any[]>([])
-const loading = ref(false)
+const loading = ref(true)
 const showChapterDrawer = ref(false)
 const showCommentDrawer = ref(false)
 
