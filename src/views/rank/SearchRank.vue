@@ -17,6 +17,7 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 async function fetchBooks() {
   loading.value = true
+  searchInput.value = ''
   try {
     const kw = route.query.keyword as string
     keyword.value = kw || ''
@@ -109,6 +110,7 @@ function onSearchBlur() {
           @input="handleSearchInput"
           @focus="onSearchFocus"
           @blur="onSearchBlur"
+          @keyup.enter="handleSearchBtn"
         />
         <div v-if="showDropdown && searchResults.length > 0" class="search-dropdown">
           <div
@@ -160,10 +162,14 @@ function onSearchBlur() {
 }
 
 .search-row {
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
   padding: 12px 16px;
   gap: 8px;
+  background: #faf7f2;
+  z-index: 50;
 }
 
 .back-btn {
