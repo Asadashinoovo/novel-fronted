@@ -161,7 +161,7 @@ onUnmounted(() => {
 .hero {
   text-align: center;
   padding: 32px 20px 24px;
-  background: linear-gradient(180deg, #fff8f0 0%, #ffffff 100%);
+  background: #faf7f2;
 }
 
 .hero-title {
@@ -285,9 +285,10 @@ onUnmounted(() => {
 }
 
 .section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #5a4a3a;
+  font-size: 22px;
+  font-weight: 700;
+  font-family: 'Noto Serif SC', serif;
+  color: #e06830;
   margin: 0 0 20px;
 }
 
