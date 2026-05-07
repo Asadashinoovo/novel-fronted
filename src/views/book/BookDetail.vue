@@ -73,7 +73,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
   <div v-loading="loading" class="book-detail">
     <!-- 顶部返回按钮 -->
     <div class="back-bar">
-      <span class="back-btn" @click="router.back()">‹ 返回</span>
+      <span class="back-btn" @click="router.push('/')">‹ 返回</span>
     </div>
     <!-- 顶部信息栏 -->
     <div class="detail-header">
@@ -222,12 +222,10 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 /* 顶部返回按钮 */
 .back-bar {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   z-index: 100;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -306,12 +304,8 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 /* 底部加入书架 */
 .shelf-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: #fff;
-  padding: 12px 20px;
+  padding: 12px 16px;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
@@ -319,7 +313,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 .shelf-btn-fixed {
   width: 100%;
-  max-width: 600px;
+  max-width: 480px;
   height: 44px;
   border-radius: 22px;
   background: #ff4d4d;
