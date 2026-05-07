@@ -277,7 +277,8 @@ function goToDetail(id: number) {
   max-width: 480px;
   margin: 0 auto;
   background: #f5f5f5;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -364,6 +365,10 @@ function goToDetail(id: number) {
   text-align: center;
   padding: 40px;
   color: #999;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-card {
@@ -406,6 +411,7 @@ function goToDetail(id: number) {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
+  flex: 1;
 }
 
 .search-bar {
@@ -517,6 +523,10 @@ function goToDetail(id: number) {
   text-align: center;
   color: #999;
   padding: 40px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 弹窗样式 */

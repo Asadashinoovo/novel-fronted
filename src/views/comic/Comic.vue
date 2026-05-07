@@ -6,7 +6,6 @@ const router = useRouter()
 <template>
   <div class="comic-page">
     <div class="nav-bar">
-      <span class="back-btn" @click="router.push('/')">‹</span>
       <span class="nav-title">漫画</span>
     </div>
     <div class="content">
