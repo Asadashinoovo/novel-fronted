@@ -84,6 +84,8 @@ function goToRead(chapterId: number) {
 .page {
   min-height: 100vh;
   background: #faf7f2;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .nav-bar {
