@@ -152,8 +152,6 @@ onUnmounted(() => {
 
 <template>
   <div class="page">
-    <nav class="nav-bar">
-    </nav>
     <div class="hero">
       <h1 class="hero-title">南瓜小说</h1>
       <p class="hero-sub">海量免费小说，畅享阅读时光</p>
@@ -395,24 +393,6 @@ onUnmounted(() => {
   .hero-title {
     font-size: 26px;
   }
-}
-
-.nav-bar {
-  position: sticky;
-  top: 0;
-  background: #fff8f0;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #f0ebe5;
-  z-index: 50;
-}
-
-.nav-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #5a3a2a;
-  margin-left: 8px;
 }
 
 .search-box {
