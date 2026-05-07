@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserInfo } from '@/api/modules/auth'
 import { getMyPublishedBooks, addBook, deleteBooks, getBookTypes } from '@/api/modules/book'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
 const isLoading = ref(true)
@@ -144,8 +144,17 @@ async function handleDelete() {
     ElMessage.warning('请选择要删除的书籍')
     return
   }
-  deleteLoading.value = true
   try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedBooks.value.length} 本书籍吗？删除后无法恢复。`,
+      '确认删除',
+      {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    deleteLoading.value = true
     const res = await deleteBooks(selectedBooks.value)
     if (res.data.success) {
       ElMessage.success('删除成功')

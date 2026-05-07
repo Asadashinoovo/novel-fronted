@@ -241,7 +241,7 @@ onUnmounted(() => {
 
 .hero {
   text-align: center;
-  padding: 32px 20px 24px;
+  padding: 12px 20px 24px;
   background: #faf7f2;
 }
 
@@ -266,6 +266,7 @@ onUnmounted(() => {
 
 .featured-section {
   margin-bottom: 24px;
+  margin-top: -40px;
 }
 
 .featured-wrapper {
@@ -375,21 +376,12 @@ onUnmounted(() => {
 
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   min-height: 200px;
 }
 
-@media (max-width: 1024px) {
-  .book-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 @media (max-width: 768px) {
-  .book-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .hero-title {
     font-size: 26px;
   }
