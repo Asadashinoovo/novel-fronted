@@ -8,7 +8,12 @@ import BookCard from './BookCard.vue'
 const router = useRouter()
 
 const books = ref<Book[]>([])
-const featuredBooks = ref<Book[]>([])
+const featuredBooks = ref<Book[]>([
+  { id: 1, title: '封面1', cover: 'https://i.bobopic.com/small/101733315.jpg', author: '', authorName: '', description: '' },
+  { id: 2, title: '封面2', cover: 'https://ts1.tc.mm.bing.net/th/id/R-C.d1d8b6cb909e5abb8da3473936348f6c?rik=y8nL78C07qf9vw&riu=http%3a%2f%2fn.sinaimg.cn%2fsinacn%2fw2048h1468%2f20180220%2f15ab-fyrswmu4535841.jpg&ehk=v9XBWX0cEZs%2b3p0j6MsXoIIQ%2bGpKaXift5Z48UWFg98%3d&risl=&pid=ImgRaw&r=0', author: '', authorName: '', description: '' },
+  { id: 3, title: '封面3', cover: 'https://www.scla.com.cn/Public/Uploads/uploadfile/images/20230830/20230830140002_64eedae295da9.jpg', author: '', authorName: '', description: '' },
+  { id: 4, title: '封面4', cover: 'https://www.scla.com.cn/Public/Uploads/uploadfile/images/20230403/20230403161613_642a8b4d66aba.jpg', author: '', authorName: '', description: '' },
+])
 const loading = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
@@ -33,8 +38,6 @@ async function fetchBooks() {
     const newBooks = res.data.data || []
     if (page.value === 1) {
       books.value = newBooks
-      // 设置今日主打（前6本或全部）
-      featuredBooks.value = newBooks.slice(0, 6)
     } else {
       books.value.push(...newBooks)
     }
@@ -192,7 +195,7 @@ onUnmounted(() => {
         <div class="featured-wrapper" @mouseenter="stopAutoSlide" @mouseleave="startAutoSlide">
           <div class="featured-track" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
             <div v-for="book in featuredBooks" :key="book.id" class="featured-item">
-              <div class="featured-card" @click="router.push(`/book/${book.id}`)">
+              <div class="featured-card">
                 <img v-if="book.cover" :src="book.cover" class="featured-cover" />
                 <div v-else class="featured-cover featured-placeholder"></div>
               </div>
