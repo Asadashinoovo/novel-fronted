@@ -95,7 +95,7 @@ function onSearchBlur() {
     <!-- 搜索栏和返回 -->
     <div class="search-row">
       <span class="back-btn" @click="router.push('/')">&lt;</span>
-      <div class="search-bar">
+      <div class="search-box">
         <span class="search-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
@@ -157,6 +157,8 @@ function onSearchBlur() {
 
 <style scoped>
 .page {
+  max-width: 480px;
+  margin: 0 auto;
   min-height: 100vh;
   background: #faf7f2;
 }
@@ -180,10 +182,10 @@ function onSearchBlur() {
   flex-shrink: 0;
 }
 
-.search-bar {
+.search-box {
   position: relative;
-  flex: 1;
-  max-width: 360px;
+  width: 360px;
+  margin: 0 auto;
 }
 
 .search-icon {
@@ -198,10 +200,10 @@ function onSearchBlur() {
 
 .search-input {
   width: 100%;
-  padding: 6px 16px 6px 40px;
+  padding: 10px 16px 10px 40px;
   font-size: 14px;
   border: 1px solid #bbb;
-  border-radius: 6px;
+  border-radius: 20px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
   background: #fafafa;
@@ -294,13 +296,6 @@ function onSearchBlur() {
   display: flex;
   align-items: center;
   border-bottom: 1px solid #f0ebe5;
-}
-
-.back-btn {
-  font-size: 20px;
-  color: #5a3a2a;
-  cursor: pointer;
-  padding: 2px 8px;
 }
 
 .nav-title {
