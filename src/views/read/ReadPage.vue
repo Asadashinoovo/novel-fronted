@@ -487,7 +487,7 @@ onMounted(() => {
 }
 
 .content {
-  max-width: 800px;
+  max-width: 480px;
   margin: 0 auto;
 }
 
