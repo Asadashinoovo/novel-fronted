@@ -73,6 +73,10 @@ function handleSearchBtn() {
 }
 
 function onSearchFocus() {
+  if (!searchInput.value) {
+    searchResults.value = []
+    return
+  }
   if (searchResults.value.length > 0) {
     showDropdown.value = true
   }
@@ -200,7 +204,7 @@ function onSearchBlur() {
 
 .search-input {
   width: 100%;
-  padding: 10px 16px 10px 40px;
+  padding: 6px 16px 6px 40px;
   font-size: 14px;
   border: 1px solid #bbb;
   border-radius: 20px;

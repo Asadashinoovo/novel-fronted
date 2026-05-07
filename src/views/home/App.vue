@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { getBookList } from '@/api/modules/book'
 import type { Book } from '@/types'
 import BookCard from './BookCard.vue'
@@ -8,6 +9,8 @@ import BookCard from './BookCard.vue'
 const router = useRouter()
 
 const books = ref<Book[]>([])
+const rankBooks = ref<Book[]>([])
+const rankLoading = ref(false)
 const featuredBooks = ref<Book[]>([
   { id: 1, title: '封面1', cover: 'https://i.bobopic.com/small/101733315.jpg', author: '', authorName: '', description: '' },
   { id: 2, title: '封面2', cover: 'https://ts1.tc.mm.bing.net/th/id/R-C.d1d8b6cb909e5abb8da3473936348f6c?rik=y8nL78C07qf9vw&riu=http%3a%2f%2fn.sinaimg.cn%2fsinacn%2fw2048h1468%2f20180220%2f15ab-fyrswmu4535841.jpg&ehk=v9XBWX0cEZs%2b3p0j6MsXoIIQ%2bGpKaXift5Z48UWFg98%3d&risl=&pid=ImgRaw&r=0', author: '', authorName: '', description: '' },
@@ -23,8 +26,35 @@ const activeTab = ref('novel')
 const currentSlide = ref(0)
 const searchFocused = ref(false)
 const searchResults = ref<Book[]>([])
+const activeRankTab = ref('recommend')
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 let slideTimer: ReturnType<typeof setInterval> | null = null
+
+async function fetchRankBooks() {
+  rankLoading.value = true
+  try {
+    const res = await getBookList({ page: 1, pageSize: 3 })
+    rankBooks.value = res.data.data || []
+  } finally {
+    rankLoading.value = false
+  }
+}
+
+const rankTabs = [
+  { key: 'recommend', label: '推荐' },
+  { key: 'finished', label: '完结' },
+  { key: 'new', label: '新书' },
+  { key: 'drama', label: '长剧' },
+  { key: 'short', label: '短剧' },
+]
+
+function handleRankTabClick(key: string) {
+  if (key !== 'recommend') {
+    ElMessage.info('功能还在开发哦')
+    return
+  }
+  activeRankTab.value = key
+}
 
 async function fetchBooks() {
   if (loading.value && !keyword.value) return
@@ -73,6 +103,8 @@ function handleSearchInput() {
 }
 
 function goToBook(book: Book) {
+  searchResults.value = []
+  searchFocused.value = false
   router.push(`/book/${book.id}`)
 }
 
@@ -80,13 +112,17 @@ function goToSearchRank() {
   if (keyword.value.trim()) {
     router.push(`/search-rank?keyword=${encodeURIComponent(keyword.value)}`)
   }
+  searchResults.value = []
+  searchFocused.value = false
 }
 
 function onSearchFocus() {
   searchFocused.value = true
-  if (keyword.value) {
-    fetchSearchResults()
+  if (!keyword.value) {
+    searchResults.value = []
+    return
   }
+  fetchSearchResults()
 }
 
 function onSearchBlur() {
@@ -140,6 +176,7 @@ function scrollToTop() {
 
 onMounted(() => {
   fetchBooks()
+  fetchRankBooks()
   window.addEventListener('scroll', handleScroll)
   startAutoSlide()
 })
@@ -219,6 +256,33 @@ onUnmounted(() => {
             :class="{ active: index === currentSlide }"
             @click="currentSlide = index"
           ></span>
+        </div>
+      </div>
+
+      <!-- 榜单切换区 -->
+      <div class="rank-section">
+        <div class="rank-tabs">
+          <span
+            v-for="tab in rankTabs"
+            :key="tab.key"
+            class="rank-tab"
+            :class="{ active: activeRankTab === tab.key }"
+            @click="handleRankTabClick(tab.key)"
+          >
+            {{ tab.label }}
+          </span>
+        </div>
+        <div v-loading="rankLoading" class="rank-content">
+          <div v-if="activeRankTab === 'recommend'" class="rank-list">
+            <div v-for="book in rankBooks" :key="book.id" class="rank-book-row" @click="goToBook(book)">
+              <img :src="book.cover" :alt="book.title" class="rank-book-cover" />
+              <div class="rank-book-info">
+                <p class="rank-book-title">{{ book.title }}</p>
+                <p class="rank-book-desc">{{ book.description }}</p>
+              </div>
+            </div>
+          </div>
+          <div v-else class="rank-placeholder">待接口填充</div>
         </div>
       </div>
 
@@ -366,8 +430,94 @@ onUnmounted(() => {
   transform: scale(1.2);
 }
 
+.rank-section {
+  margin-bottom: 24px;
+}
+
+.rank-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rank-tab {
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #666;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f0ebe5;
+}
+
+.rank-tab.active {
+  background: linear-gradient(135deg, #ff6b35, #ee5a24);
+  color: #fff;
+  font-weight: 600;
+}
+
+.rank-content {
+  min-height: 120px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.rank-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rank-book-row {
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.rank-book-cover {
+  width: 50px;
+  height: 67px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.rank-book-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rank-book-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-book-desc {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 .section-title {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   font-family: 'Noto Serif SC', serif;
   color: #e06830;
@@ -405,7 +555,7 @@ onUnmounted(() => {
 
 .search-input {
   width: 100%;
-  padding: 10px 16px 10px 40px;
+  padding: 6px 16px 6px 40px;
   font-size: 14px;
   border: 1px solid #bbb;
   border-radius: 20px;
@@ -459,7 +609,7 @@ onUnmounted(() => {
 
 .search-input {
   width: 100%;
-  padding: 10px 16px 10px 40px;
+  padding: 6px 16px 6px 40px;
   font-size: 14px;
   border: 1px solid #bbb;
   border-radius: 20px;
