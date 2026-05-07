@@ -167,23 +167,10 @@ function goToDetail(id: number) {
 
 <template>
   <div class="publish-page">
-    <div class="header">
-      <span class="page-title">我的发布</span>
-      <div class="header-actions">
-        <button v-if="!isManageMode" class="manage-btn" @click="isManageMode = true">管理</button>
-        <template v-else>
-          <button class="cancel-btn" @click="isManageMode = false; selectedBooks = []">取消</button>
-          <button
-            class="delete-btn"
-            @click="handleDelete"
-            :disabled="selectedBooks.length === 0 || deleteLoading"
-          >
-            删除 ({{ selectedBooks.length }})
-          </button>
-        </template>
-        <button class="add-btn" @click="openAddDialog">添加书籍</button>
-      </div>
-    </div>
+    <div class="nav-bar">
+  <span class="back-btn" @click="router.push('/me')">‹</span>
+  <span class="nav-title">我的发布</span>
+</div>
     <div v-if="isLoading" class="loading">加载中...</div>
     <template v-else-if="userInfo">
       <div class="user-card">
@@ -279,6 +266,8 @@ function goToDetail(id: number) {
 <style scoped>
 .publish-page {
   min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
   background: #f5f5f5;
   padding: 20px;
 }
@@ -335,6 +324,31 @@ function goToDetail(id: number) {
   border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
+}
+
+.nav-bar {
+  position: sticky;
+  top: 0;
+  background: #fff8f0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0ebe5;
+  z-index: 50;
+}
+
+.back-btn {
+  font-size: 20px;
+  color: #5a3a2a;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.nav-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #5a3a2a;
+  margin-left: 8px;
 }
 
 .loading {
