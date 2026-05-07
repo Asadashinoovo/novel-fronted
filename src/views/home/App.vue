@@ -153,7 +153,6 @@ onUnmounted(() => {
 <template>
   <div class="page">
     <nav class="nav-bar">
-      <span class="nav-title">南瓜小说</span>
     </nav>
     <div class="hero">
       <h1 class="hero-title">南瓜小说</h1>
