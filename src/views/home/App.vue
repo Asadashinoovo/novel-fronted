@@ -41,11 +41,11 @@ async function fetchRankBooks() {
 }
 
 const rankTabs = [
-  { key: 'recommend', label: '推荐' },
-  { key: 'finished', label: '完结' },
-  { key: 'new', label: '新书' },
-  { key: 'drama', label: '长剧' },
-  { key: 'short', label: '短剧' },
+  { key: 'recommend', label: '推荐榜' },
+  { key: 'finished', label: '完结榜' },
+  { key: 'new', label: '新书榜' },
+  { key: 'drama', label: '长剧榜' },
+  { key: 'short', label: '短剧榜' },
 ]
 
 function handleRankTabClick(key: string) {
@@ -261,18 +261,18 @@ onUnmounted(() => {
 
       <!-- 榜单切换区 -->
       <div class="rank-section">
-        <div class="rank-tabs">
-          <span
-            v-for="tab in rankTabs"
-            :key="tab.key"
-            class="rank-tab"
-            :class="{ active: activeRankTab === tab.key }"
-            @click="handleRankTabClick(tab.key)"
-          >
-            {{ tab.label }}
-          </span>
-        </div>
         <div v-loading="rankLoading" class="rank-content">
+          <div class="rank-tabs">
+            <span
+              v-for="tab in rankTabs"
+              :key="tab.key"
+              class="rank-tab"
+              :class="{ active: activeRankTab === tab.key }"
+              @click="handleRankTabClick(tab.key)"
+            >
+              {{ tab.label }}
+            </span>
+          </div>
           <div v-if="activeRankTab === 'recommend'" class="rank-list">
             <div v-for="book in rankBooks" :key="book.id" class="rank-book-row" @click="goToBook(book)">
               <img :src="book.cover" :alt="book.title" class="rank-book-cover" />
@@ -305,19 +305,19 @@ onUnmounted(() => {
 
 .hero {
   text-align: center;
-  padding: 12px 20px 24px;
+  padding: 8px 20px 16px;
   background: #faf7f2;
 }
 
 .hero-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #5a3a2a;
-  margin: 0 0 6px;
+  margin: 0 0 2px;
 }
 
 .hero-sub {
-  font-size: 12px;
+  font-size: 11px;
   color: #8a7a6a;
   margin: 0;
 }
@@ -413,12 +413,12 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #d0c0b0;
   cursor: pointer;
@@ -431,37 +431,36 @@ onUnmounted(() => {
 }
 
 .rank-section {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  margin-top: -10px;
 }
 
 .rank-tabs {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 20px;
+  margin-bottom: 8px;
 }
 
 .rank-tab {
-  padding: 6px 14px;
   font-size: 13px;
-  color: #666;
-  border-radius: 20px;
+  font-weight: 400;
+  color: #999;
   cursor: pointer;
   transition: all 0.2s;
-  background: #f0ebe5;
 }
 
 .rank-tab.active {
-  background: linear-gradient(135deg, #ff6b35, #ee5a24);
-  color: #fff;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
 }
 
 .rank-content {
   min-height: 120px;
   background: #fff;
   border-radius: 12px;
-  padding: 16px;
+  padding: 10px 16px;
 }
 
 .rank-grid {
@@ -483,8 +482,8 @@ onUnmounted(() => {
 }
 
 .rank-book-cover {
-  width: 50px;
-  height: 67px;
+  width: 45px;
+  height: 60px;
   object-fit: cover;
   border-radius: 6px;
   flex-shrink: 0;
@@ -521,7 +520,7 @@ onUnmounted(() => {
   font-weight: 700;
   font-family: 'Noto Serif SC', serif;
   color: #e06830;
-  margin: 0 0 20px;
+  margin: -8px 0 12px;
 }
 
 .book-grid {
