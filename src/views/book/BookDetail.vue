@@ -70,13 +70,15 @@ function goToRead(chapterId: number, chapterIndex: number) {
 </script>
 
 <template>
-  <div v-loading="loading" class="book-detail">
+  <div class="book-detail">
     <!-- 顶部返回按钮 -->
     <div class="back-bar">
       <div class="back-bar-inner">
         <span class="back-btn" @click="router.push('/')">‹ 返回</span>
       </div>
     </div>
+    <div v-if="loading" class="loading-placeholder"></div>
+    <template v-else>
     <!-- 顶部信息栏 -->
     <div class="detail-header">
       <div class="header-content">
@@ -200,6 +202,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
         <div v-else class="empty-tip">暂无热门书评</div>
       </div>
     </div>
+    </template>
 
     <!-- 底部加入书架 -->
     <div class="shelf-bar">
@@ -222,6 +225,14 @@ function goToRead(chapterId: number, chapterIndex: number) {
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+}
+
+.loading-placeholder {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
 }
 
 /* 顶部返回按钮 */
