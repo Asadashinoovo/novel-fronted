@@ -168,9 +168,17 @@ function goToDetail(id: number) {
 <template>
   <div class="publish-page">
     <div class="nav-bar">
-  <span class="back-btn" @click="router.push('/me')">‹</span>
-  <span class="nav-title">我的发布</span>
-</div>
+      <span class="back-btn" @click="router.push('/me')">‹</span>
+      <span class="nav-title">我的发布</span>
+      <div class="header-actions">
+        <button v-if="!isManageMode" class="manage-btn" @click="isManageMode = true">管理</button>
+        <template v-else>
+          <button class="cancel-btn" @click="isManageMode = false; selectedBooks = []">取消</button>
+          <button class="delete-btn" @click="handleDelete" :disabled="selectedBooks.length === 0 || deleteLoading">删除 ({{ selectedBooks.length }})</button>
+        </template>
+        <button class="add-btn" @click="openAddDialog">添加书籍</button>
+      </div>
+    </div>
     <div v-if="isLoading" class="loading">加载中...</div>
     <template v-else-if="userInfo">
       <div class="user-card">
@@ -288,6 +296,7 @@ function goToDetail(id: number) {
 .header-actions {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 
 .manage-btn,
