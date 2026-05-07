@@ -73,7 +73,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
   <div v-loading="loading" class="book-detail">
     <!-- 顶部返回按钮 -->
     <div class="back-bar">
-      <span class="back-btn" @click="router.push('/')">‹ 返回</span>
+      <span class="back-btn" @click="router.back()">‹ 返回</span>
     </div>
     <!-- 顶部信息栏 -->
     <div class="detail-header">

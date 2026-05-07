@@ -16,6 +16,8 @@ const hasMore = ref(true)
 const keyword = ref('')
 const activeTab = ref('novel')
 const currentSlide = ref(0)
+const searchFocused = ref(false)
+const searchResults = ref<Book[]>([])
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 let slideTimer: ReturnType<typeof setInterval> | null = null
 
@@ -41,6 +43,53 @@ async function fetchBooks() {
   } finally {
     loading.value = false
   }
+}
+
+async function fetchSearchResults() {
+  if (!keyword.value.trim()) {
+    searchResults.value = []
+    return
+  }
+  try {
+    const res = await getBookList({
+      page: 1,
+      pageSize: 10,
+      keyword: keyword.value
+    })
+    searchResults.value = res.data.data || []
+  } catch (e) {
+    searchResults.value = []
+  }
+}
+
+function handleSearchInput() {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    fetchSearchResults()
+  }, 300)
+}
+
+function goToBook(book: Book) {
+  router.push(`/book/${book.id}`)
+}
+
+function goToSearchRank() {
+  if (keyword.value.trim()) {
+    router.push(`/search-rank?keyword=${encodeURIComponent(keyword.value)}`)
+  }
+}
+
+function onSearchFocus() {
+  searchFocused.value = true
+  if (keyword.value) {
+    fetchSearchResults()
+  }
+}
+
+function onSearchBlur() {
+  setTimeout(() => {
+    searchFocused.value = false
+  }, 200)
 }
 
 function nextSlide() {
@@ -104,13 +153,37 @@ onUnmounted(() => {
       <h1 class="hero-title">南瓜小说</h1>
       <p class="hero-sub">海量免费小说，畅享阅读时光</p>
       <div class="search-box">
+        <span class="search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+        </span>
         <input
           v-model="keyword"
           type="text"
           placeholder="搜索书名..."
           class="search-input"
-          @input="handleSearch"
+          @input="handleSearchInput"
+          @focus="onSearchFocus"
+          @blur="onSearchBlur"
+          @keyup.enter="goToSearchRank"
         />
+        <div v-if="searchFocused && searchResults.length > 0" class="search-dropdown">
+          <div
+            v-for="book in searchResults"
+            :key="book.id"
+            class="search-result-item"
+            @click="goToBook(book)"
+          >
+            <img v-if="book.cover" :src="book.cover" class="result-cover" />
+            <div v-else class="result-cover result-placeholder"></div>
+            <div class="result-info">
+              <div class="result-title">{{ book.title }}</div>
+              <div class="result-author">{{ book.authorName || book.author }}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="container">
@@ -315,15 +388,24 @@ onUnmounted(() => {
 }
 
 .search-box {
-  margin-top: 20px;
+  position: relative;
+  width: 360px;
+  margin: 20px auto 0;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
   display: flex;
-  justify-content: center;
+  align-items: center;
 }
 
 .search-input {
   width: 100%;
-  max-width: 400px;
-  padding: 10px 16px;
+  padding: 10px 16px 10px 40px;
   font-size: 14px;
   border: 1px solid #bbb;
   border-radius: 20px;
@@ -336,6 +418,68 @@ onUnmounted(() => {
   border-color: #ff6b35;
   box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
   background: #fff;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: #faf7f2;
+}
+
+.search-result-item + .search-result-item {
+  border-top: 1px solid #f0ebe5;
+}
+
+.result-cover {
+  width: 48px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.result-placeholder {
+  background: linear-gradient(135deg, #f0e6d6 0%, #e8d5c0 100%);
+}
+
+.result-info {
+  margin-left: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.result-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a3a2a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-author {
+  font-size: 12px;
+  color: #8a7a6a;
+  margin-top: 4px;
 }
 
 .no-more {
