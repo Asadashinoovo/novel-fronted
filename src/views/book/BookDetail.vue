@@ -25,31 +25,18 @@ async function fetchBook() {
 
   loading.value = true
   try {
-    const bookRes = await getBookDetail(id)
+    const [bookRes, chaptersRes, commentsRes, similarRes] = await Promise.all([
+      getBookDetail(id),
+      getBookChapters(id),
+      getBookComments(id),
+      getSimilarBooks(id)
+    ])
     book.value = bookRes.data.data
-  } catch (e) {
-    console.error('获取书籍详情失败:', e)
-  }
-
-  try {
-    const chaptersRes = await getBookChapters(id)
     chapters.value = chaptersRes.data.data || []
-  } catch (e) {
-    console.error('获取目录失败:', e)
-  }
-
-  try {
-    const commentsRes = await getBookComments(id)
     comments.value = commentsRes.data.data || []
-  } catch (e) {
-    console.error('获取评论失败:', e)
-  }
-
-  try {
-    const similarRes = await getSimilarBooks(id)
     similarBooks.value = similarRes.data.data || []
   } catch (e) {
-    console.error('获取相似书籍失败:', e)
+    console.error('获取数据失败:', e)
   }
 
   loading.value = false
