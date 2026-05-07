@@ -208,6 +208,8 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 <style scoped>
 .book-detail {
+  max-width: 480px;
+  margin: 0 auto;
   min-height: 100vh;
   background: #fff;
   color: #000;
