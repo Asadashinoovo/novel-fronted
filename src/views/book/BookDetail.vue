@@ -16,6 +16,7 @@ const similarBooks = ref<any[]>([])
 const loading = ref(true)
 const showChapterDrawer = ref(false)
 const showCommentDrawer = ref(false)
+const isDescriptionExpanded = ref(false)
 
 async function fetchBook() {
   const id = Number(route.params.id)
@@ -116,8 +117,11 @@ function goToRead(chapterId: number, chapterIndex: number) {
         <div class="section-header">
           <span class="section-title">简介</span>
         </div>
-        <div class="description">
+        <div class="description" :class="{ collapsed: !isDescriptionExpanded }">
           {{ book?.description || '暂无简介' }}
+        </div>
+        <div class="description-toggle" @click="isDescriptionExpanded = !isDescriptionExpanded">
+          {{ isDescriptionExpanded ? '收起' : '展开全部' }}
         </div>
       </div>
 
@@ -470,6 +474,25 @@ function goToRead(chapterId: number, chapterIndex: number) {
   font-size: 14px;
   color: #666;
   line-height: 1.8;
+}
+
+.description.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.description-toggle {
+  font-size: 13px;
+  color: #ff6b6b;
+  text-align: center;
+  padding: 8px 0 4px;
+  cursor: default;
+}
+
+.description-toggle:hover {
+  color: #ff5252;
 }
 
 /* 目录列表 */

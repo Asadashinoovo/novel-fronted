@@ -14,7 +14,8 @@ const editForm = ref({
   title: '',
   cover: '',
   description: '',
-  types: [] as any[]
+  types: [] as any[],
+  isFinished: 0
 })
 const editLoading = ref(false)
 const showAddDialog = ref(false)
@@ -82,7 +83,8 @@ function openEditDialog() {
     title: bookInfo.value.title || '',
     cover: bookInfo.value.cover || '',
     description: bookInfo.value.description || '',
-    types: bookInfo.value.types ? [...bookInfo.value.types] : []
+    types: bookInfo.value.types ? [...bookInfo.value.types] : [],
+    isFinished: bookInfo.value.isFinished ?? 0
   }
   showEditDialog.value = true
   showTypeDropdown.value = false
@@ -308,6 +310,19 @@ async function handleDeleteChapter(chapter: any) {
             >
               {{ type.typeName }}
             </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label>完结状态</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" v-model="editForm.isFinished" :value="0" />
+              <span>未完结</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" v-model="editForm.isFinished" :value="1" />
+              <span>已完结</span>
+            </label>
           </div>
         </div>
         <div class="dialog-actions">
@@ -680,6 +695,25 @@ async function handleDeleteChapter(chapter: any) {
 .type-option.selected {
   color: #667eea;
   background: #f0f0ff;
+}
+
+.radio-group {
+  display: flex;
+  gap: 20px;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.radio-item input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 .dialog-content {
