@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getChapterContent, getBookChapters, getBookDetail } from '@/api/modules/book'
+import { getBookCache } from '@/utils/cache'
 import { getSummaryUpToChapter } from '@/api/modules/ai'
 import { ElMessage } from 'element-plus'
 import { ElDrawer, ElDialog } from 'element-plus'
@@ -36,6 +37,18 @@ const isDarkMode = ref(false)
 
 // 目录抽屉显示状态
 const showChapterDrawer = ref(false)
+const chapterListRef = ref<HTMLElement | null>(null)
+
+watch(showChapterDrawer, (val) => {
+  if (val) {
+    nextTick(() => {
+      const active = chapterListRef.value?.querySelector('.chapter-item.active')
+      if (active) {
+        (active as HTMLElement).scrollIntoView({ block: 'center', behavior: 'instant' })
+      }
+    })
+  }
+})
 
 // AI 功能状态
 const showSummaryDialog = ref(false)
@@ -212,33 +225,68 @@ watch(() => [route.params.id, route.query.chapterIndex], (newId, newIndex) => {
   }
 }, { immediate: false })
 
+// 首次进入页面：获取书籍信息 + 章节列表（只调一次）
+async function fetchBookInfo(bookId: number) {
+  try {
+    const [bookRes, chaptersRes] = await Promise.all([
+      getBookDetail(bookId),
+      getBookChapters(bookId)
+    ])
+    if (bookRes.data.success) {
+      bookName.value = bookRes.data.data.title
+      bookCover.value = bookRes.data.data.cover
+    }
+    chapters.value = chaptersRes.data.data || []
+  } catch (e) {
+    console.error('获取书籍/章节列表失败:', e)
+  }
+}
+
+// 根据当前 chapterIndex 计算上一章/下一章
+function updateChapterNav() {
+  const idx = chapterIndex.value
+  prevChapterId.value = idx > 0 ? chapters.value[idx - 1].id : null
+  nextChapterId.value = idx < chapters.value.length - 1 ? chapters.value[idx + 1].id : null
+}
+
+// 切章时：只获取章节内容
 async function fetchChapter() {
   window.scrollTo(0, 0)
-  // 重置状态
   chapter.value = null
-  chapters.value = []  // 先清空章节列表
-  prevChapterId.value = null
-  nextChapterId.value = null
   pages.value = []
   currentPage.value = 1
   showChapterDrawer.value = false
 
   const bookId = Number(route.params.bookId)
   const chapterId = Number(route.params.id)
-  const queryIndex = route.query.chapterIndex
-  chapterIndex.value = queryIndex ? Number(queryIndex) : 0
+  chapterIndex.value = Number(route.query.chapterIndex) || 0
   if (isNaN(bookId) || isNaN(chapterId)) {
     ElMessage.error('参数错误')
     router.back()
     return
   }
 
+  // 首次进入时章节列表为空，先加载书籍信息和章节列表
+  if (chapters.value.length === 0) {
+    loading.value = true
+    // 优先从缓存读取（BookDetail 页面已加载过）
+    const cache = getBookCache(bookId)
+    if (cache) {
+      bookName.value = cache.detail.title
+      bookCover.value = cache.detail.cover
+      chapters.value = cache.chapters
+    } else {
+      await fetchBookInfo(bookId)
+    }
+  }
+
+  updateChapterNav()
+
   try {
     const res = await getChapterContent(bookId, chapterId)
     if (res.data.success) {
       chapter.value = res.data.data
       splitContentIntoPages(res.data.data.content)
-      // 检查是否需要跳到最后一页
       const targetPage = route.query.targetPage
       if (targetPage === '-1') {
         currentPage.value = totalPages.value
@@ -248,37 +296,6 @@ async function fetchChapter() {
     ElMessage.error('获取章节内容失败')
   } finally {
     loading.value = false
-  }
-
-  // 获取书籍信息
-  try {
-    const bookRes = await getBookDetail(bookId)
-    if (bookRes.data.success) {
-      bookName.value = bookRes.data.data.title
-      bookCover.value = bookRes.data.data.cover
-    }
-  } catch (e) {
-    console.error('获取书籍信息失败:', e)
-  }
-
-  // 获取章节列表计算上一章/下一章
-  try {
-    const chaptersRes = await getBookChapters(bookId)
-    chapters.value = chaptersRes.data.data || []
-    chapterIndex.value = Number(route.query.chapterIndex) || 0
-
-    if (chapterIndex.value > 0) {
-      prevChapterId.value = chapters.value[chapterIndex.value - 1].id
-    } else {
-      prevChapterId.value = null
-    }
-    if (chapterIndex.value < chapters.value.length - 1) {
-      nextChapterId.value = chapters.value[chapterIndex.value + 1].id
-    } else {
-      nextChapterId.value = null
-    }
-  } catch (e) {
-    console.error('获取章节列表失败:', e)
   }
 }
 
@@ -388,7 +405,7 @@ onMounted(() => {
           <img v-if="bookCover" :src="bookCover" class="drawer-cover" />
           <span class="drawer-book-name">{{ bookName }}</span>
         </div>
-        <div class="drawer-chapter-list">
+        <div class="drawer-chapter-list" ref="chapterListRef">
           <div class="chapter-item" v-for="(chapter, index) in chapters" :key="chapter.id" :class="{ active: index === chapterIndex }" @click="goToChapter(chapter.id, index)">
             <span v-if="index === chapterIndex" class="active-icon">●</span>
             <span class="chapter-num">第{{ index + 1 }}章</span><span class="chapter-gap"></span><span class="chapter-title">{{ chapter.title }}</span>

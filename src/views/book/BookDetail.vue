@@ -5,6 +5,7 @@ import { getBookDetail, getBookChapters, getBookComments, getSimilarBooks } from
 import { ElMessage } from 'element-plus'
 import { ElDrawer } from 'element-plus'
 import type { Book } from '@/types'
+import { setBookCache } from '@/utils/cache'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,6 +37,7 @@ async function fetchBook() {
     chapters.value = chaptersRes.data.data || []
     comments.value = commentsRes.data.data || []
     similarBooks.value = similarRes.data.data || []
+    setBookCache(id, bookRes.data.data, chaptersRes.data.data || [])
   } catch (e) {
     console.error('获取数据失败:', e)
   }
