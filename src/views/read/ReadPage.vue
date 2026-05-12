@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getChapterContent, getBookChapters, getBookDetail } from '@/api/modules/book'
 import { getSummaryUpToChapter } from '@/api/modules/ai'
@@ -36,6 +36,18 @@ const isDarkMode = ref(false)
 
 // 目录抽屉显示状态
 const showChapterDrawer = ref(false)
+const chapterListRef = ref<HTMLElement | null>(null)
+
+watch(showChapterDrawer, (val) => {
+  if (val) {
+    nextTick(() => {
+      const active = chapterListRef.value?.querySelector('.chapter-item.active')
+      if (active) {
+        (active as HTMLElement).scrollIntoView({ block: 'center', behavior: 'instant' })
+      }
+    })
+  }
+})
 
 // AI 功能状态
 const showSummaryDialog = ref(false)
@@ -388,7 +400,7 @@ onMounted(() => {
           <img v-if="bookCover" :src="bookCover" class="drawer-cover" />
           <span class="drawer-book-name">{{ bookName }}</span>
         </div>
-        <div class="drawer-chapter-list">
+        <div class="drawer-chapter-list" ref="chapterListRef">
           <div class="chapter-item" v-for="(chapter, index) in chapters" :key="chapter.id" :class="{ active: index === chapterIndex }" @click="goToChapter(chapter.id, index)">
             <span v-if="index === chapterIndex" class="active-icon">●</span>
             <span class="chapter-num">第{{ index + 1 }}章</span><span class="chapter-gap"></span><span class="chapter-title">{{ chapter.title }}</span>

@@ -39,7 +39,6 @@ export interface CharacterEvent {
   chapterId: number
   chapterTitle: string
   eventDescription: string
-  sortOrder: number
 }
 
 export interface CharacterSearchResult {
