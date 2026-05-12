@@ -69,6 +69,6 @@ export function deleteChapter(bookId: number, chapterId: number): Promise<ApiRes
   return axios.post(`/api/chapter/delete/${bookId}/${chapterId}`)
 }
 
-export function addChapter(data: { bookId: number; title: string; content: string }): Promise<ApiResponse<any>> {
-  return axios.post('/api/chapter/add', data)
+export function addChapter(data: { bookId: number; title: string; content: string }, afterChapterId?: number): Promise<ApiResponse<any>> {
+  return axios.post('/api/chapter/add', data, { params: afterChapterId != null ? { afterChapterId } : {} })
 }

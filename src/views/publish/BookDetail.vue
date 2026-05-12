@@ -24,6 +24,7 @@ const addForm = ref({
   content: ''
 })
 const addLoading = ref(false)
+const afterChapterId = ref<number | undefined>(undefined)
 const showEditChapterDialog = ref(false)
 const editChapterForm = ref({
   id: 0,
@@ -136,8 +137,9 @@ async function handleUpdate() {
   }
 }
 
-function openAddDialog() {
+function openAddDialog(chapterId?: number) {
   addForm.value = { title: '', content: '' }
+  afterChapterId.value = chapterId
   showAddDialog.value = true
 }
 
@@ -172,7 +174,7 @@ async function handleAddChapter() {
       bookId: bookInfo.value.id,
       title: addForm.value.title,
       content: addForm.value.content
-    })
+    }, afterChapterId.value)
     if (res.data.success) {
       ElMessage.success('添加章节成功')
       showAddDialog.value = false
@@ -260,6 +262,7 @@ async function handleDeleteChapter(chapter: any) {
         <h3>章节列表 ({{ chapterList.length }})</h3>
         <div v-if="chapterList.length > 0" class="chapter-list">
           <div v-for="chapter in chapterList" :key="chapter.id" class="chapter-item">
+            <span class="add-after-btn" @click.stop="openAddDialog(chapter.id)">在下方添加</span>
             <div class="chapter-left" @click="openEditChapterDialog(chapter)">
               <div class="chapter-info">
                 <span class="chapter-num">第{{ chapter.chapterNum }}章</span>
@@ -565,6 +568,18 @@ async function handleDeleteChapter(chapter: any) {
   font-size: 12px;
   color: #999;
   align-items: center;
+}
+
+.add-after-btn {
+  color: #667eea;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.add-after-btn:hover {
+  text-decoration: underline;
 }
 
 .delete-chapter-btn {
