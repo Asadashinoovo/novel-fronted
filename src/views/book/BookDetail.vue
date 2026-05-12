@@ -13,9 +13,10 @@ const book = ref<Book | null>(null)
 const chapters = ref<any[]>([])
 const comments = ref<any[]>([])
 const similarBooks = ref<any[]>([])
-const loading = ref(false)
+const loading = ref(true)
 const showChapterDrawer = ref(false)
 const showCommentDrawer = ref(false)
+const isDescriptionExpanded = ref(false)
 
 async function fetchBook() {
   const id = Number(route.params.id)
@@ -25,31 +26,18 @@ async function fetchBook() {
 
   loading.value = true
   try {
-    const bookRes = await getBookDetail(id)
+    const [bookRes, chaptersRes, commentsRes, similarRes] = await Promise.all([
+      getBookDetail(id),
+      getBookChapters(id),
+      getBookComments(id),
+      getSimilarBooks(id)
+    ])
     book.value = bookRes.data.data
-  } catch (e) {
-    console.error('获取书籍详情失败:', e)
-  }
-
-  try {
-    const chaptersRes = await getBookChapters(id)
     chapters.value = chaptersRes.data.data || []
-  } catch (e) {
-    console.error('获取目录失败:', e)
-  }
-
-  try {
-    const commentsRes = await getBookComments(id)
     comments.value = commentsRes.data.data || []
-  } catch (e) {
-    console.error('获取评论失败:', e)
-  }
-
-  try {
-    const similarRes = await getSimilarBooks(id)
     similarBooks.value = similarRes.data.data || []
   } catch (e) {
-    console.error('获取相似书籍失败:', e)
+    console.error('获取数据失败:', e)
   }
 
   loading.value = false
@@ -70,11 +58,15 @@ function goToRead(chapterId: number, chapterIndex: number) {
 </script>
 
 <template>
-  <div v-loading="loading" class="book-detail">
+  <div class="book-detail">
     <!-- 顶部返回按钮 -->
     <div class="back-bar">
-      <span class="back-btn" @click="router.push('/')">‹ 返回</span>
+      <div class="back-bar-inner">
+        <span class="back-btn" @click="router.push('/')">‹ 返回</span>
+      </div>
     </div>
+    <div v-if="loading" class="loading-placeholder"></div>
+    <template v-else>
     <!-- 顶部信息栏 -->
     <div class="detail-header">
       <div class="header-content">
@@ -125,8 +117,11 @@ function goToRead(chapterId: number, chapterIndex: number) {
         <div class="section-header">
           <span class="section-title">简介</span>
         </div>
-        <div class="description">
+        <div class="description" :class="{ collapsed: !isDescriptionExpanded }">
           {{ book?.description || '暂无简介' }}
+        </div>
+        <div class="description-toggle" @click="isDescriptionExpanded = !isDescriptionExpanded">
+          {{ isDescriptionExpanded ? '收起' : '展开全部' }}
         </div>
       </div>
 
@@ -198,16 +193,21 @@ function goToRead(chapterId: number, chapterIndex: number) {
         <div v-else class="empty-tip">暂无热门书评</div>
       </div>
     </div>
+    </template>
 
     <!-- 底部加入书架 -->
     <div class="shelf-bar">
-      <el-button type="primary" class="shelf-btn-fixed">加入书架</el-button>
+      <div class="shelf-bar-inner">
+        <el-button type="primary" class="shelf-btn-fixed">加入书架</el-button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .book-detail {
+  max-width: 480px;
+  margin: 0 auto;
   min-height: 100vh;
   background: #fff;
   color: #000;
@@ -218,6 +218,14 @@ function goToRead(chapterId: number, chapterIndex: number) {
   user-select: none;
 }
 
+.loading-placeholder {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
 /* 顶部返回按钮 */
 .back-bar {
   position: fixed;
@@ -225,10 +233,15 @@ function goToRead(chapterId: number, chapterIndex: number) {
   left: 0;
   right: 0;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   z-index: 100;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-bar-inner {
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .back-btn {
@@ -309,15 +322,21 @@ function goToRead(chapterId: number, chapterIndex: number) {
   left: 0;
   right: 0;
   background: #fff;
-  padding: 12px 20px;
+  padding: 12px 16px;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.shelf-bar-inner {
+  max-width: 480px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
 }
 
 .shelf-btn-fixed {
   width: 100%;
-  max-width: 600px;
+  max-width: 480px;
   height: 44px;
   border-radius: 22px;
   background: #ff4d4d;
@@ -455,6 +474,25 @@ function goToRead(chapterId: number, chapterIndex: number) {
   font-size: 14px;
   color: #666;
   line-height: 1.8;
+}
+
+.description.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.description-toggle {
+  font-size: 13px;
+  color: #ff6b6b;
+  text-align: center;
+  padding: 8px 0 4px;
+  cursor: default;
+}
+
+.description-toggle:hover {
+  color: #ff5252;
 }
 
 /* 目录列表 */

@@ -45,6 +45,9 @@ const summaryLoading = ref(false)
 const showChatDrawer = ref(false)
 const showCharacterDrawer = ref(false)
 
+// 悬浮球状态
+const showFloatBall = ref(false)
+
 // 分页控制函数
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
@@ -159,6 +162,12 @@ const handleContentClick = (e: MouseEvent) => {
   if (isDragging.value) return
   // 如果抽屉或对话框是打开的，不处理点击事件
   if (showChapterDrawer.value || showSummaryDialog.value || showChatDrawer.value || showCharacterDrawer.value) return
+
+  // 如果悬浮球菜单是打开的，关闭它
+  if (showFloatBall.value) {
+    showFloatBall.value = false
+    return
+  }
 
   const target = e.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
@@ -302,16 +311,6 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- AI 功能区（仅在最后一页显示） -->
-      <div v-if="currentPage === totalPages" class="ai-section">
-        <div class="ai-section-divider">— AI 辅助 —</div>
-        <div class="ai-buttons">
-          <button class="ai-btn" @click.stop="openSummary">前情提要</button>
-          <button class="ai-btn" @click.stop="showChatDrawer = true">AI 助手</button>
-          <button class="ai-btn" @click.stop="showCharacterDrawer = true">角色查询</button>
-        </div>
-      </div>
-
       <!-- 底部翻页导航 -->
       <div class="page-navigation" :class="{ hidden: !showNavBar }">
         <div class="nav-row top-row">
@@ -367,9 +366,23 @@ onMounted(() => {
             <span class="action-label">评论</span>
           </div>
         </div>
-      </div>
+  </div>
 
-      <!-- 目录抽屉 -->
+  <!-- 悬浮球 -->
+  <div class="float-ball-container" :class="{ hidden: !showNavBar }" @click.stop>
+    <div class="float-ball" @click.stop="showFloatBall = !showFloatBall" :class="{ active: showFloatBall }">
+      <span class="float-ball-icon">AI</span>
+    </div>
+    <transition name="fade-slide">
+      <div v-if="showFloatBall" class="float-ball-menu">
+        <div class="float-menu-item" @click.stop="openSummary(); showFloatBall = false">前情提要</div>
+        <div class="float-menu-item" @click.stop="showChatDrawer = true; showFloatBall = false">AI 助手</div>
+        <div class="float-menu-item" @click.stop="showCharacterDrawer = true; showFloatBall = false">角色查询</div>
+      </div>
+    </transition>
+  </div>
+
+  <!-- 目录抽屉 -->
       <el-drawer v-model="showChapterDrawer" title="目录" direction="rtl" size="60%" :style="{ '--el-drawer-bg-color': '#e8f5e9' }">
         <div class="drawer-header">
           <img v-if="bookCover" :src="bookCover" class="drawer-cover" />
@@ -474,7 +487,7 @@ onMounted(() => {
 }
 
 .content {
-  max-width: 800px;
+  max-width: 480px;
   margin: 0 auto;
 }
 
@@ -812,6 +825,95 @@ onMounted(() => {
 .action-label {
   font-size: 10px;
   color: var(--read-icon-color, #333);
+}
+
+/* 悬浮球 */
+.float-ball-container {
+  position: fixed;
+  right: 60px;
+  bottom: 28%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 200;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.float-ball-container.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.float-ball {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #4a90d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(74, 144, 217, 0.4);
+  transition: all 0.3s ease;
+}
+
+.float-ball:hover {
+  transform: scale(1.1);
+  background: #3a7fc4;
+}
+
+.float-ball.active {
+  background: #2d6aa6;
+}
+
+.float-ball-icon {
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.float-ball-menu {
+  position: absolute;
+  bottom: 48px;
+  right: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+  min-width: 90px;
+}
+
+.float-menu-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #5c4a32;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.float-menu-item:last-child {
+  border-bottom: none;
+}
+
+.float-menu-item:hover {
+  background: #f5f0e8;
+}
+
+/* 悬浮球菜单动画 */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.2s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
 /* AI 功能区 */

@@ -19,9 +19,11 @@ function goTo(path: string, tab: string) {
 <template>
   <router-view />
   <div class="tab-bar" v-if="showTabBar">
-    <div class="tab-item" :class="{ active: activeTab === 'novel' }" @click="goTo('/', 'novel')">小说</div>
-    <div class="tab-item" :class="{ active: activeTab === 'comic' }" @click="goTo('/comic', 'comic')">漫画</div>
-    <div class="tab-item" :class="{ active: activeTab === 'me' }" @click="goTo('/me', 'me')">我</div>
+    <div class="tab-bar-inner">
+      <div class="tab-item" :class="{ active: activeTab === 'novel' }" @click="goTo('/', 'novel')">小说</div>
+      <div class="tab-item" :class="{ active: activeTab === 'comic' }" @click="goTo('/comic', 'comic')">漫画</div>
+      <div class="tab-item" :class="{ active: activeTab === 'me' }" @click="goTo('/me', 'me')">我</div>
+    </div>
   </div>
 </template>
 
@@ -32,10 +34,15 @@ function goTo(path: string, tab: string) {
   left: 0;
   right: 0;
   background: #fff;
-  display: flex;
   border-top: 1px solid #eee;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
   z-index: 100;
+}
+
+.tab-bar-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
 }
 
 .tab-item {

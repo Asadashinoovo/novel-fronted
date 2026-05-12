@@ -14,7 +14,8 @@ const editForm = ref({
   title: '',
   cover: '',
   description: '',
-  types: [] as any[]
+  types: [] as any[],
+  isFinished: 0
 })
 const editLoading = ref(false)
 const showAddDialog = ref(false)
@@ -23,6 +24,7 @@ const addForm = ref({
   content: ''
 })
 const addLoading = ref(false)
+const afterChapterId = ref<number | undefined>(undefined)
 const showEditChapterDialog = ref(false)
 const editChapterForm = ref({
   id: 0,
@@ -82,7 +84,8 @@ function openEditDialog() {
     title: bookInfo.value.title || '',
     cover: bookInfo.value.cover || '',
     description: bookInfo.value.description || '',
-    types: bookInfo.value.types ? [...bookInfo.value.types] : []
+    types: bookInfo.value.types ? [...bookInfo.value.types] : [],
+    isFinished: bookInfo.value.isFinished ?? 0
   }
   showEditDialog.value = true
   showTypeDropdown.value = false
@@ -134,8 +137,9 @@ async function handleUpdate() {
   }
 }
 
-function openAddDialog() {
+function openAddDialog(chapterId?: number) {
   addForm.value = { title: '', content: '' }
+  afterChapterId.value = chapterId
   showAddDialog.value = true
 }
 
@@ -170,7 +174,7 @@ async function handleAddChapter() {
       bookId: bookInfo.value.id,
       title: addForm.value.title,
       content: addForm.value.content
-    })
+    }, afterChapterId.value)
     if (res.data.success) {
       ElMessage.success('添加章节成功')
       showAddDialog.value = false
@@ -225,11 +229,13 @@ async function handleDeleteChapter(chapter: any) {
 
 <template>
   <div class="detail-page">
-    <div class="header">
-      <span class="back-btn" @click="router.back()">‹ 返回</span>
-      <button v-if="bookInfo" class="edit-btn" @click="openEditDialog">编辑</button>
-      <button v-if="bookInfo" class="add-btn" @click="openAddDialog">添加章节</button>
-    </div>
+    <div class="nav-bar">
+  <span class="back-btn" @click="router.back()">‹</span>
+  <span class="nav-title">书籍详情</span>
+  <div style="flex:1"></div>
+  <button v-if="bookInfo" class="edit-btn" @click="openEditDialog">编辑</button>
+  <button v-if="bookInfo" class="add-btn" @click="openAddDialog">添加章节</button>
+</div>
     <div v-if="isLoading" class="loading">加载中...</div>
     <div v-else-if="bookInfo" class="content">
       <div class="book-header">
@@ -256,6 +262,7 @@ async function handleDeleteChapter(chapter: any) {
         <h3>章节列表 ({{ chapterList.length }})</h3>
         <div v-if="chapterList.length > 0" class="chapter-list">
           <div v-for="chapter in chapterList" :key="chapter.id" class="chapter-item">
+            <span class="add-after-btn" @click.stop="openAddDialog(chapter.id)">在下方添加</span>
             <div class="chapter-left" @click="openEditChapterDialog(chapter)">
               <div class="chapter-info">
                 <span class="chapter-num">第{{ chapter.chapterNum }}章</span>
@@ -306,6 +313,19 @@ async function handleDeleteChapter(chapter: any) {
             >
               {{ type.typeName }}
             </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label>完结状态</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" v-model="editForm.isFinished" :value="0" />
+              <span>未完结</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" v-model="editForm.isFinished" :value="1" />
+              <span>已完结</span>
+            </label>
           </div>
         </div>
         <div class="dialog-actions">
@@ -369,21 +389,33 @@ async function handleDeleteChapter(chapter: any) {
 .detail-page {
   min-height: 100vh;
   background: #f5f5f5;
-  padding: 20px;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
-.header {
+.nav-bar {
+  position: sticky;
+  top: 0;
+  background: #fff8f0;
+  padding: 12px 16px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  border-bottom: 1px solid #f0ebe5;
+  z-index: 50;
 }
 
 .back-btn {
-  font-size: 16px;
-  color: #667eea;
+  font-size: 20px;
+  color: #5a3a2a;
   cursor: pointer;
+  padding: 4px 8px;
+}
+
+.nav-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #5a3a2a;
+  margin-left: 8px;
 }
 
 .edit-btn {
@@ -538,6 +570,18 @@ async function handleDeleteChapter(chapter: any) {
   align-items: center;
 }
 
+.add-after-btn {
+  color: #667eea;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.add-after-btn:hover {
+  text-decoration: underline;
+}
+
 .delete-chapter-btn {
   padding: 4px 12px;
   background: #ff4d4f;
@@ -666,6 +710,25 @@ async function handleDeleteChapter(chapter: any) {
 .type-option.selected {
   color: #667eea;
   background: #f0f0ff;
+}
+
+.radio-group {
+  display: flex;
+  gap: 20px;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.radio-item input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 .dialog-content {
