@@ -2,6 +2,7 @@
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getChapterContent, getBookChapters, getBookDetail } from '@/api/modules/book'
+import { getBookCache } from '@/utils/cache'
 import { getSummaryUpToChapter } from '@/api/modules/ai'
 import { ElMessage } from 'element-plus'
 import { ElDrawer, ElDialog } from 'element-plus'
@@ -268,7 +269,15 @@ async function fetchChapter() {
   // 首次进入时章节列表为空，先加载书籍信息和章节列表
   if (chapters.value.length === 0) {
     loading.value = true
-    await fetchBookInfo(bookId)
+    // 优先从缓存读取（BookDetail 页面已加载过）
+    const cache = getBookCache(bookId)
+    if (cache) {
+      bookName.value = cache.detail.title
+      bookCover.value = cache.detail.cover
+      chapters.value = cache.chapters
+    } else {
+      await fetchBookInfo(bookId)
+    }
   }
 
   updateChapterNav()
