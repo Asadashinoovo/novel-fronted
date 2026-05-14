@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getBookList } from '@/api/modules/book'
@@ -7,6 +7,7 @@ import type { Book } from '@/types'
 import BookCard from './BookCard.vue'
 
 const router = useRouter()
+const scrolled = ref(false)
 
 const books = ref<Book[]>([])
 const rankBooks = ref<Book[]>([])
@@ -164,6 +165,7 @@ function handleSearch() {
 }
 
 function handleScroll() {
+  scrolled.value = window.scrollY > 30
   const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - window.scrollY
   if (scrollBottom < 100) {
     fetchBooks()
@@ -189,44 +191,49 @@ onUnmounted(() => {
 
 <template>
   <div class="page">
-    <div class="hero">
-      <h1 class="hero-title">南瓜小说</h1>
-      <p class="hero-sub">海量免费小说，畅享阅读时光</p>
-      <div class="search-row">
-        <div class="search-box">
-          <span class="search-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
-          </span>
-          <input
-            v-model="keyword"
-            type="text"
-            placeholder="搜索书名..."
-            class="search-input"
-            @input="handleSearchInput"
-            @focus="onSearchFocus"
-            @blur="onSearchBlur"
-            @keyup.enter="goToSearchRank"
-          />
-          <div v-if="searchFocused && searchResults.length > 0" class="search-dropdown">
-            <div
-              v-for="book in searchResults"
-              :key="book.id"
-              class="dropdown-item"
-              @click="goToBook(book)"
-            >
-              <img v-if="book.cover" :src="book.cover" class="dropdown-cover" />
-              <div v-else class="dropdown-cover dropdown-placeholder"></div>
-              <div class="dropdown-info">
-                <div class="dropdown-title">{{ book.title }}</div>
-                <div class="dropdown-author">{{ book.authorName || book.author }}</div>
+    <div class="hero" :class="{ scrolled }">
+      <div class="hero-inner">
+        <div class="hero-brand" :class="{ hidden: scrolled }">
+          <h1 class="hero-title">南瓜小说</h1>
+          <span class="hero-stroke"></span>
+          <p class="hero-sub">海量免费</p>
+        </div>
+        <div class="search-row" :class="{ focused: searchFocused }">
+          <div class="search-box">
+            <span class="search-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </span>
+            <input
+              v-model="keyword"
+              type="text"
+              placeholder="寻一本好书"
+              class="search-input"
+              @input="handleSearchInput"
+              @focus="onSearchFocus"
+              @blur="onSearchBlur"
+              @keyup.enter="goToSearchRank"
+            />
+            <div v-if="searchFocused && searchResults.length > 0" class="search-dropdown">
+              <div
+                v-for="book in searchResults"
+                :key="book.id"
+                class="dropdown-item"
+                @click="goToBook(book)"
+              >
+                <img v-if="book.cover" :src="book.cover" class="dropdown-cover" />
+                <div v-else class="dropdown-cover dropdown-placeholder"></div>
+                <div class="dropdown-info">
+                  <div class="dropdown-title">{{ book.title }}</div>
+                  <div class="dropdown-author">{{ book.authorName || book.author }}</div>
+                </div>
               </div>
             </div>
           </div>
+          <button class="search-btn" @click="goToSearchRank">搜索</button>
         </div>
-        <button class="search-btn" @click="goToSearchRank">搜索</button>
       </div>
     </div>
     <div class="container">
@@ -286,11 +293,13 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <h2 class="section-title">热门推荐</h2>
-      <div v-loading="loading" class="book-grid">
-        <BookCard v-for="book in books" :key="book.id" :book="book" />
+      <div class="book-section">
+        <h2 class="section-title">热门推荐</h2>
+        <div v-loading="loading" class="book-grid">
+          <BookCard v-for="book in books" :key="book.id" :book="book" />
+        </div>
+        <div v-if="!hasMore && books.length > 0" class="no-more">没有更多了</div>
       </div>
-      <div v-if="!hasMore && books.length > 0" class="no-more">没有更多了</div>
     </div>
   </div>
 </template>
@@ -300,37 +309,85 @@ onUnmounted(() => {
   min-height: 100vh;
   max-width: 480px;
   margin: 0 auto;
-  background: #faf7f2;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
 }
 
 .hero {
-  text-align: center;
-  padding: 8px 20px 16px;
-  background: #faf7f2;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 12px 24px;
+  background: #fff;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s, padding 0.3s;
+}
+
+.hero.scrolled {
+  border-bottom-color: #f0f0f0;
+  padding: 10px 24px;
+}
+
+.hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  overflow: hidden;
+  max-width: 200px;
+  opacity: 1;
+  transition: max-width 0.4s ease, opacity 0.3s ease, margin 0.4s ease;
+  margin-right: 0;
+}
+
+.hero-brand.hidden {
+  max-width: 0;
+  opacity: 0;
+  margin-right: -12px;
 }
 
 .hero-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #5a3a2a;
-  margin: 0 0 2px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: 2px;
+  margin: 0;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.hero-stroke {
+  width: 24px;
+  height: 2px;
+  background: #e53e3e;
+  border-radius: 1px;
+  flex-shrink: 0;
 }
 
 .hero-sub {
-  font-size: 11px;
-  color: #8a7a6a;
+  font-size: 12px;
+  color: #888;
+  letter-spacing: 1px;
   margin: 0;
+  white-space: nowrap;
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px 16px 40px;
 }
 
 .featured-section {
-  margin-bottom: 24px;
-  margin-top: -40px;
 }
 
 .featured-wrapper {
@@ -431,8 +488,6 @@ onUnmounted(() => {
 }
 
 .rank-section {
-  margin-bottom: 16px;
-  margin-top: -10px;
 }
 
 .rank-tabs {
@@ -515,12 +570,18 @@ onUnmounted(() => {
   -webkit-box-orient: vertical;
 }
 
+.book-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .section-title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
-  font-family: 'Noto Serif SC', serif;
-  color: #e06830;
-  margin: -8px 0 12px;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: 1px;
 }
 
 .book-grid {
@@ -530,119 +591,77 @@ onUnmounted(() => {
   min-height: 200px;
 }
 
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 26px;
-  }
-}
 
-.search-box {
-  position: relative;
-  width: 360px;
-  margin: 20px auto 0;
-}
-
-.search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  width: 100%;
-  padding: 6px 16px 6px 40px;
-  font-size: 14px;
-  border: 1px solid #bbb;
-  border-radius: 20px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  background: #fafafa;
-}
-
-.search-input:focus {
-  border-color: #ff6b35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
-  background: #fff;
-}
-
-.search-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 8px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
-  z-index: 100;
-}
 
 .search-row {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  gap: 8px;
-  background: #faf7f2;
+display: flex;
+align-items: center;
+gap: 0;
+min-width: 0;
+width: 52%;
+transition: width 0.4s ease;
+}
+
+.hero.scrolled .search-row,
+.hero .search-row.focused {
+width: 100%;
 }
 
 .search-box {
   position: relative;
-  width: 360px;
-  margin: 0 auto;
+  flex: 1;
 }
 
 .search-icon {
   position: absolute;
-  left: 14px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #bbb;
   display: flex;
   align-items: center;
 }
 
 .search-input {
   width: 100%;
-  padding: 6px 16px 6px 40px;
-  font-size: 14px;
-  border: 1px solid #bbb;
-  border-radius: 20px;
+  padding: 7px 12px 7px 32px;
+  font-size: 12px;
+  border: none;
+  border-radius: 2px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  background: #fafafa;
+  background: #f5f5f5;
+  transition: background 0.2s;
 }
 
 .search-input:focus {
-  border-color: #ff6b35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
-  background: #fff;
+  background: #eee;
 }
 
 .search-btn {
-  padding: 6px 14px;
-  background: #e06830;
+  padding: 7px 12px;
+  background: #c0392b;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.search-btn:active {
+  opacity: 0.7;
 }
 
 .search-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
-  margin-top: 8px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   z-index: 100;
 }
@@ -652,27 +671,27 @@ onUnmounted(() => {
   align-items: center;
   padding: 10px 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
 .dropdown-item:hover {
-  background: #faf7f2;
+  background: #fafafa;
 }
 
 .dropdown-item + .dropdown-item {
-  border-top: 1px solid #f0ebe5;
+  border-top: 1px solid #f0f0f0;
 }
 
 .dropdown-cover {
-  width: 36px;
-  height: 48px;
+  width: 32px;
+  height: 44px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 2px;
   flex-shrink: 0;
 }
 
 .dropdown-placeholder {
-  background: linear-gradient(135deg, #f0e6d6 0%, #e8d5c0 100%);
+  background: #eee;
 }
 
 .dropdown-info {
@@ -684,7 +703,7 @@ onUnmounted(() => {
 .dropdown-title {
   font-size: 13px;
   font-weight: 600;
-  color: #5a3a2a;
+  color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -692,15 +711,16 @@ onUnmounted(() => {
 
 .dropdown-author {
   font-size: 11px;
-  color: #8a7a6a;
+  color: #999;
   margin-top: 2px;
 }
 
 .no-more {
   text-align: center;
-  color: #a09080;
+  color: #666;
   padding: 20px;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
   padding-bottom: 70px;
 }
 </style>
