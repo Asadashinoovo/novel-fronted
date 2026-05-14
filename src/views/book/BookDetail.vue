@@ -61,16 +61,16 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 <template>
   <div class="book-detail">
-    <!-- 顶部返回按钮 -->
-    <div class="back-bar">
-      <div class="back-bar-inner">
-        <span class="back-btn" @click="router.push('/')">‹ 返回</span>
-      </div>
-    </div>
     <div v-if="loading" class="loading-placeholder"></div>
     <template v-else>
     <!-- 顶部信息栏 -->
     <div class="detail-header">
+      <div class="side-back" @click="router.back()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        <span>返回</span>
+      </div>
       <div class="header-content">
         <img v-if="book" :src="book.cover" :alt="book.title" class="book-cover" />
         <div class="book-info">
@@ -94,8 +94,8 @@ function goToRead(chapterId: number, chapterIndex: number) {
         <el-button type="primary" class="action-btn read-btn" @click="goToRead(chapters[0]?.id, 0)">
           开始阅读
         </el-button>
-        <el-button class="action-btn">
-          书评
+        <el-button class="action-btn shelf-btn">
+          加入书架
         </el-button>
       </div>
     </div>
@@ -131,23 +131,20 @@ function goToRead(chapterId: number, chapterIndex: number) {
       <div class="content-card">
         <div class="section-header">
           <span class="section-title">目录</span>
-          <span class="section-more" @click="showChapterDrawer = true">更多 ></span>
+          <span class="section-count">共{{ chapters.length }}章</span>
+          <span class="section-more" @click="showChapterDrawer = true">全部 ></span>
         </div>
         <div class="chapter-list" v-if="chapters.length">
-          <div class="chapter-item" v-for="(chapter, index) in chapters.slice(0, 5)" :key="chapter.id" @click="goToRead(chapter.id, index)">
+          <div class="chapter-item" v-for="(chapter, index) in chapters" :key="chapter.id" @click="goToRead(chapter.id, index)">
             <span class="chapter-num">第{{ index + 1 }}章</span>
             <span class="chapter-title">{{ chapter.title }}</span>
-          </div>
-          <div class="chapter-more" v-if="chapters.length > 5" @click="showChapterDrawer = true">
-            <span>...</span>
-            <span class="more-text">展开更多</span>
           </div>
         </div>
         <div v-else class="empty-tip">暂无目录</div>
       </div>
 
       <!-- 章节抽屉 -->
-      <el-drawer v-model="showChapterDrawer" title="目录" direction="rtl" size="70%" :style="{ '--el-drawer-bg-color': '#e8f5e9' }">
+      <el-drawer v-model="showChapterDrawer" title="目录" direction="rtl" size="70%">
         <div class="drawer-chapter-list">
           <div class="chapter-item" v-for="(chapter, index) in chapters" :key="chapter.id" @click="goToRead(chapter.id, index)">
             <span class="chapter-num">第{{ index + 1 }}章</span>
@@ -196,13 +193,6 @@ function goToRead(chapterId: number, chapterIndex: number) {
       </div>
     </div>
     </template>
-
-    <!-- 底部加入书架 -->
-    <div class="shelf-bar">
-      <div class="shelf-bar-inner">
-        <el-button type="primary" class="shelf-btn-fixed">加入书架</el-button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -213,7 +203,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
   min-height: 100vh;
   background: #fff;
   color: #000;
-  padding-bottom: 40px;
+  padding-bottom: 20px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
@@ -228,34 +218,39 @@ function goToRead(chapterId: number, chapterIndex: number) {
   color: #999;
 }
 
-/* 顶部返回按钮 */
-.back-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  z-index: 100;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+/* PC端返回按钮（header右上角） */
+.side-back {
+  display: none;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
 }
 
-.back-bar-inner {
-  max-width: 480px;
-  margin: 0 auto;
+.side-back:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.back-btn {
-  font-size: 16px;
-  color: #333;
-  cursor: default;
+@media (min-width: 640px) {
+  .side-back {
+    display: flex;
+  }
 }
 
 /* 顶部信息栏 */
 .detail-header {
+  position: relative;
   background: #444;
-  padding: 60px 20px 30px;
+  padding: 24px 20px 30px;
 }
 
 .header-content {
@@ -308,47 +303,19 @@ function goToRead(chapterId: number, chapterIndex: number) {
 }
 
 .shelf-btn {
-  display: none;
+  border: 1.5px solid #ff6b6b !important;
+  color: #ff6b6b !important;
+  background: #fff !important;
+}
+
+.shelf-btn:hover {
+  background: #fff5f5 !important;
 }
 
 .book-hot {
   font-size: 12px;
   color: #ff6b6b;
   margin: 0;
-}
-
-/* 底部加入书架 */
-.shelf-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  padding: 12px 16px;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-}
-
-.shelf-bar-inner {
-  max-width: 480px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-}
-
-.shelf-btn-fixed {
-  width: 100%;
-  max-width: 480px;
-  height: 44px;
-  border-radius: 22px;
-  background: #ff4d4d;
-  border: none;
-  color: #fff;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
 }
 
 /* 操作按钮 */
@@ -498,9 +465,22 @@ function goToRead(chapterId: number, chapterIndex: number) {
 }
 
 /* 目录列表 */
+.section-count {
+  font-size: 12px;
+  color: #999;
+}
+
 .chapter-list {
   display: flex;
   flex-direction: column;
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chapter-list::-webkit-scrollbar {
+  display: none;
 }
 
 .chapter-item {
@@ -531,24 +511,6 @@ function goToRead(chapterId: number, chapterIndex: number) {
   flex: 1;
 }
 
-.chapter-more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0;
-  cursor: default;
-  color: #999;
-  font-size: 12px;
-}
-
-.chapter-more:hover {
-  color: #666;
-}
-
-.more-text {
-  margin-left: 4px;
-}
-
 .drawer-chapter-list {
   display: flex;
   flex-direction: column;
@@ -556,20 +518,12 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 .drawer-chapter-list .chapter-item {
   padding: 14px 0;
-  border-bottom: 1px solid #ccc;
-  cursor: default;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
 }
 
 .drawer-chapter-list .chapter-item:hover {
-  background: #e8f5e9;
-}
-
-.drawer-chapter-list .chapter-num {
-  font-size: 14px;
-}
-
-.drawer-chapter-list .chapter-title {
-  font-size: 14px;
+  background: #f9f9f9;
 }
 
 /* 热门书评 */
