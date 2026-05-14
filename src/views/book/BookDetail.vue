@@ -50,11 +50,7 @@ onMounted(() => {
 })
 
 function goBack() {
-  if (window.history.length > 1) {
-    router.back()
-  } else {
-    router.push('/')
-  }
+  router.push('/')
 }
 
 function goToRead(chapterId: number, chapterIndex: number) {
