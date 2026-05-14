@@ -49,6 +49,14 @@ onMounted(() => {
   fetchBook()
 })
 
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/')
+  }
+}
+
 function goToRead(chapterId: number, chapterIndex: number) {
   if (!chapterId) {
     ElMessage.warning('请联系作者添加书本内容')
@@ -65,7 +73,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
     <template v-else>
     <!-- 顶部信息栏 -->
     <div class="detail-header">
-      <div class="side-back" @click="router.back()">
+      <div class="side-back" @click="goBack">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 18l-6-6 6-6"/>
         </svg>
@@ -220,7 +228,7 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 /* PC端返回按钮（header右上角） */
 .side-back {
-  display: none;
+  display: flex;
   position: absolute;
   right: 16px;
   top: 16px;
@@ -240,11 +248,6 @@ function goToRead(chapterId: number, chapterIndex: number) {
   background: rgba(255, 255, 255, 0.3);
 }
 
-@media (min-width: 640px) {
-  .side-back {
-    display: flex;
-  }
-}
 
 /* 顶部信息栏 */
 .detail-header {
