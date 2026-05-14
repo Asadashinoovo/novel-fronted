@@ -33,10 +33,6 @@ function goToDetail() {
     </div>
     <div class="info">
       <h3 class="book-title">{{ book.title }}</h3>
-      <p class="book-author">
-        <el-icon><User /></el-icon>
-        {{ book.authorName }}
-      </p>
       <p class="book-desc">{{ book.description }}</p>
     </div>
   </div>
@@ -94,36 +90,27 @@ function goToDetail() {
 }
 
 .info {
-  padding: 10px;
+  padding: 6px;
 }
 
 .book-title {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #222;
-  margin: 0 0 6px;
+  margin: 0 0 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.book-author {
-  font-size: 12px;
-  color: #999;
-  margin: 0 0 10px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .book-desc {
-  font-size: 12px;
+  font-size: 11px;
   color: #666;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.6;
+  line-height: 1.4;
 }
 </style>
