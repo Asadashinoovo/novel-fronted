@@ -79,8 +79,8 @@ onMounted(() => {
 
 <template>
   <div class="me-page">
-    <div class="header">
-      <span class="page-title">个人中心</span>
+    <div class="nav-bar">
+      <span class="nav-title">个人中心</span>
     </div>
 
     <div class="user-card" @click="openDrawer">
@@ -136,19 +136,35 @@ onMounted(() => {
 
 <style scoped>
 .me-page {
+  max-width: 480px;
+  margin: 0 auto;
   min-height: 100vh;
-  background: #f5f5f5;
-  padding: 20px;
+  background: #faf7f2;
 }
 
-.header {
-  margin-bottom: 20px;
+.nav-bar {
+  position: sticky;
+  top: 0;
+  background: #fff8f0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0ebe5;
+  z-index: 50;
 }
 
-.page-title {
-  font-size: 18px;
+.back-btn {
+  font-size: 20px;
+  color: #5a3a2a;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.nav-title {
+  font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: #5a3a2a;
+  margin-left: 8px;
 }
 
 .user-card {

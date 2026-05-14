@@ -8,7 +8,9 @@
       "Bash(git -C \"D:/Projects/web-project/test/my-app\" log --oneline -5)",
       "Bash(git checkout:*)",
       "Bash(find src:*)",
-      "Bash(dir \"E:\\\\novel\\\\novel-fronted\")"
+      "Bash(dir \"E:\\\\novel\\\\novel-fronted\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

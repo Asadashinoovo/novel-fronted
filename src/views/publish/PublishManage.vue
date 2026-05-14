@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserInfo } from '@/api/modules/auth'
 import { getMyPublishedBooks, addBook, deleteBooks, getBookTypes } from '@/api/modules/book'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
 const isLoading = ref(true)
@@ -144,8 +144,17 @@ async function handleDelete() {
     ElMessage.warning('请选择要删除的书籍')
     return
   }
-  deleteLoading.value = true
   try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedBooks.value.length} 本书籍吗？删除后无法恢复。`,
+      '确认删除',
+      {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    deleteLoading.value = true
     const res = await deleteBooks(selectedBooks.value)
     if (res.data.success) {
       ElMessage.success('删除成功')
@@ -167,19 +176,14 @@ function goToDetail(id: number) {
 
 <template>
   <div class="publish-page">
-    <div class="header">
-      <span class="page-title">我的发布</span>
+    <div class="nav-bar">
+      <span class="back-btn" @click="router.push('/me')">‹</span>
+      <span class="nav-title">我的发布</span>
       <div class="header-actions">
         <button v-if="!isManageMode" class="manage-btn" @click="isManageMode = true">管理</button>
         <template v-else>
           <button class="cancel-btn" @click="isManageMode = false; selectedBooks = []">取消</button>
-          <button
-            class="delete-btn"
-            @click="handleDelete"
-            :disabled="selectedBooks.length === 0 || deleteLoading"
-          >
-            删除 ({{ selectedBooks.length }})
-          </button>
+          <button class="delete-btn" @click="handleDelete" :disabled="selectedBooks.length === 0 || deleteLoading">删除 ({{ selectedBooks.length }})</button>
         </template>
         <button class="add-btn" @click="openAddDialog">添加书籍</button>
       </div>
@@ -279,8 +283,11 @@ function goToDetail(id: number) {
 <style scoped>
 .publish-page {
   min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
   background: #f5f5f5;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -299,6 +306,7 @@ function goToDetail(id: number) {
 .header-actions {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 
 .manage-btn,
@@ -337,10 +345,39 @@ function goToDetail(id: number) {
   cursor: pointer;
 }
 
+.nav-bar {
+  position: sticky;
+  top: 0;
+  background: #fff8f0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0ebe5;
+  z-index: 50;
+}
+
+.back-btn {
+  font-size: 20px;
+  color: #5a3a2a;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.nav-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #5a3a2a;
+  margin-left: 8px;
+}
+
 .loading {
   text-align: center;
   padding: 40px;
   color: #999;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-card {
@@ -383,6 +420,7 @@ function goToDetail(id: number) {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
+  flex: 1;
 }
 
 .search-bar {
@@ -494,6 +532,10 @@ function goToDetail(id: number) {
   text-align: center;
   color: #999;
   padding: 40px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 弹窗样式 */
