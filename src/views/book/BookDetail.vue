@@ -228,13 +228,14 @@ function goToRead(chapterId: number, chapterIndex: number) {
 
 /* PC端返回按钮（header右上角） */
 .side-back {
-  display: flex;
   position: absolute;
   right: 16px;
-  top: 16px;
+  top: 13px;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 8px 14px;
+  padding: 5px 10px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   color: #fff;
@@ -242,6 +243,17 @@ function goToRead(chapterId: number, chapterIndex: number) {
   cursor: pointer;
   transition: background 0.2s;
   white-space: nowrap;
+  z-index: 10;
+  min-width: 50px;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+
+.side-back::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
 }
 
 .side-back:hover {
@@ -253,7 +265,8 @@ function goToRead(chapterId: number, chapterIndex: number) {
 .detail-header {
   position: relative;
   background: #444;
-  padding: 24px 20px 30px;
+  padding: 35px 20px 30px;
+  max-width: 100%;
 }
 
 .header-content {

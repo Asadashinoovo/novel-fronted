@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://asadashino.xyz',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         timeout: 32000
       }
