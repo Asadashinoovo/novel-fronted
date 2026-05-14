@@ -154,6 +154,18 @@ function stopAutoSlide() {
   }
 }
 
+let touchStartX = 0
+function onTouchStart(e: TouchEvent) {
+  touchStartX = e.touches[0].clientX
+  stopAutoSlide()
+}
+function onTouchEnd(e: TouchEvent) {
+  const diff = e.changedTouches[0].clientX - touchStartX
+  if (diff > 50) prevSlide()
+  else if (diff < -50) nextSlide()
+  startAutoSlide()
+}
+
 function handleSearch() {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
@@ -239,27 +251,27 @@ onUnmounted(() => {
     <div class="container">
       <!-- 今日主打 -->
       <div class="featured-section">
-        <div class="featured-wrapper" @mouseenter="stopAutoSlide" @mouseleave="startAutoSlide">
+        <div
+          class="featured-wrapper"
+          @mouseenter="stopAutoSlide"
+          @mouseleave="startAutoSlide"
+          @touchstart="onTouchStart"
+          @touchend="onTouchEnd"
+        >
           <div class="featured-track" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-            <div v-for="book in featuredBooks" :key="book.id" class="featured-item">
+            <div v-for="(book, index) in featuredBooks" :key="book.id" class="featured-item">
               <div class="featured-card">
                 <img v-if="book.cover" :src="book.cover" class="featured-cover" />
                 <div v-else class="featured-cover featured-placeholder"></div>
               </div>
             </div>
           </div>
-          <button class="slide-btn slide-left" @click="prevSlide">
-            <span>&lt;</span>
-          </button>
-          <button class="slide-btn slide-right" @click="nextSlide">
-            <span>&gt;</span>
-          </button>
         </div>
-        <div class="slide-dots">
+        <div class="slide-indicators">
           <span
             v-for="(_, index) in featuredBooks"
             :key="index"
-            class="dot"
+            class="indicator"
             :class="{ active: index === currentSlide }"
             @click="currentSlide = index"
           ></span>
@@ -393,36 +405,31 @@ onUnmounted(() => {
 .featured-wrapper {
   position: relative;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 14px;
+  padding: 0 0;
 }
 
 .featured-track {
   display: flex;
-  transition: transform 0.5s ease;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .featured-item {
   flex: 0 0 100%;
-  padding: 0 8px;
   box-sizing: border-box;
 }
 
 .featured-card {
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.featured-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(90, 60, 30, 0.12);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .featured-cover {
   width: 100%;
-  height: 130px;
+  height: 150px;
   object-fit: cover;
 }
 
@@ -430,61 +437,25 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #f0e6d6 0%, #e8d5c0 100%);
 }
 
-.slide-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: background 0.2s;
-  z-index: 2;
-}
-
-.slide-btn:hover {
-  background: #fff;
-}
-
-.slide-btn span {
-  font-size: 18px;
-  color: #5a3a2a;
-  line-height: 1;
-}
-
-.slide-left {
-  left: 12px;
-}
-
-.slide-right {
-  right: 12px;
-}
-
-.slide-dots {
+.slide-indicators {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 12px;
 }
 
-.dot {
+.indicator {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  background: #d0c0b0;
+  border-radius: 3px;
+  background: #d4d4d4;
   cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
+  transition: width 0.3s ease, background 0.3s ease;
 }
 
-.dot.active {
-  background: #ff6b35;
-  transform: scale(1.2);
+.indicator.active {
+  width: 20px;
+  background: #e53e3e;
 }
 
 .rank-section {
