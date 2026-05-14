@@ -526,7 +526,7 @@ onUnmounted(() => {
 .book-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 12px;
   min-height: 200px;
 }
 
