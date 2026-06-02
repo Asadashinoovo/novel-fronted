@@ -307,12 +307,12 @@ onMounted(() => {
 <template>
   <div class="read-page" @click="handleContentClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove">
     <div class="top-nav" :class="{ hidden: !showNavBar }">
-      <span class="top-nav-back" @click.stop="router.push(`/book/${route.params.bookId}`)">返回</span>
+      <span class="top-nav-back" @click.stop="router.replace(`/book/${route.params.bookId}`)">返回</span>
       <span class="top-nav-left" @click.stop="ElMessage.info('该功能还未实现哦~')">加入书架</span>
       <span class="top-nav-right" @click.stop="ElMessage.info('该功能还未实现哦~')">下载</span>
     </div>
     <div class="header">
-      <span class="back-btn" @click.stop="router.push(`/book/${route.params.bookId}`)"><span class="arrow">&lt;</span> 第{{ chapterIndex + 1 }}章 {{ chapter?.title }}</span>
+      <span class="back-btn" @click.stop="router.replace(`/book/${route.params.bookId}`)"><span class="arrow">&lt;</span> 第{{ chapterIndex + 1 }}章 {{ chapter?.title }}</span>
     </div>
     <div v-if="loading" class="loading">加载中...</div>
     <div v-else-if="chapter" class="content">
